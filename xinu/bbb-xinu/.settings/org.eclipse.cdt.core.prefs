@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.390093790.1672909563/PATH/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.390093790.1672909563/PATH/operation=replace
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.390093790.1672909563/PATH/value=arm-none-eabi-gcc\:/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/usr/games\:/usr/local/games\:/home/nathan/workspace/bbb-xinu/include
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.390093790.1672909563/append=true
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.390093790.1672909563/appendContributed=true
