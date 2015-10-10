@@ -28,8 +28,11 @@ pid32	currpid;		/* ID of currently executing process	*/
 
 uint32 state_times[PR_STATES]; /* ADDDD */
 uint32 procs_finished; /* ADDDD */
-uint16 scheduler; /*  ADDDD */
 uint16 readycount; /*  ADDDD */
+uint32 environment[ENV_VARS];
+const char* env_vars[] = {"environment","scheduler","unused","unused","unused"};
+const uint32 env_valcounts[] = {0,3,0,0,0};
+const char* env_vals[][] = {{},{"priority","shortest job first","random"},{},{},{}};
 
 /*------------------------------------------------------------------------
  * nulluser - initialize the system and become the null process
@@ -133,7 +136,8 @@ static	void	sysinit()
 	/* Initialize system variables */
 
 	/*  ADDDD */
-	scheduler = QTYPE_DEFAULT;
+	for(i=0;i<ENV_VARS;i++) environment[i] = EV_VALUE_INVALID;
+	environment[EV_SCHEDULER] = QTYPE_DEFAULT;
 
 	/* ADDDD */
 	readycount = 0;

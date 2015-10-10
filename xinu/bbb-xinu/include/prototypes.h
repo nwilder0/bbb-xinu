@@ -620,6 +620,11 @@ extern	syscall	yield(void);
 extern syscall record_cpu(pid32);
 extern uint32 cputime();
 
+/* in file clear_cpudata.c */
+extern syscall clear_cpudata();
+
+/* in file setenv.c */
+extern syscall setenv(uint32, uint32);
 
 /* NETWORK BYTE ORDER CONVERSION NOT NEEDED ON A BIG-ENDIAN COMPUTER */
 #define	htons(x)   ( ( 0xff & ((x)>>8) ) | ( (0xff & (x)) << 8 ) )
