@@ -30,9 +30,10 @@ uint32 state_times[PR_STATES]; /* ADDDD */
 uint32 procs_finished; /* ADDDD */
 uint16 readycount; /*  ADDDD */
 uint32 environment[ENV_VARS];
-const char* env_vars[] = {"environment","scheduler","unused","unused","unused"};
-const uint32 env_valcounts[] = {0,3,0,0,0};
-const char* env_vals[][] = {{},{"priority","shortest job first","random"},{},{},{}};
+const char* env_vars[] = {"environment","scheduler","cpuqdata","unused","unused"};
+const uint32 env_valcounts[] = {0,3,2,0,0};
+const char* env_vals[][] = {{},{"priority","shortest job first","random"},{"yes","no"},{},{}};
+qid16 scratchlist;
 
 /*------------------------------------------------------------------------
  * nulluser - initialize the system and become the null process
@@ -137,7 +138,9 @@ static	void	sysinit()
 
 	/*  ADDDD */
 	for(i=0;i<ENV_VARS;i++) environment[i] = EV_VALUE_INVALID;
+
 	environment[EV_SCHEDULER] = QTYPE_DEFAULT;
+	environment[EV_CPUQDATA] = EV_VALUE_NO;
 
 	/* ADDDD */
 	readycount = 0;
@@ -180,6 +183,7 @@ static	void	sysinit()
 	kprintf("init null proc state times\n");
 	for(i=0; i<PR_STATES; i++) prptr->statetimes[i] = 0;
 	prptr->prprio = 0;
+	prptr->prprio0 = 0; /* set initial provided priority, used when moving back to priority queuing */
 	strncpy(prptr->prname, "prnull", 7);
 	prptr->prstkbase = getstk(NULLSTK);
 	prptr->prstklen = NULLSTK;
@@ -204,6 +208,9 @@ static	void	sysinit()
 	/* Create a ready list for processes */
 	kprintf("readylist\n");
 	readylist = newqueue();
+
+	/* Create a scratch queue for temporary purposes, should only be used inside a syscall with interrupts disabled */
+	scratchlist = newqueue();
 
 	/* Initialize the real time clock */
 	kprintf("clkinit()\n");

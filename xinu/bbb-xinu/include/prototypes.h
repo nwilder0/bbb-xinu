@@ -70,6 +70,7 @@ extern	uint32	dot2ip(char *, uint32 *);
 /* in file queue.c */
 extern  pid32	dequeue(qid16);
 extern	pid32	enqueue(pid32, qid16);
+extern  void	copyqueue(qid16, qid16);
 
 /* in file intutils.S */
 
@@ -591,7 +592,6 @@ extern	status	udp_release(uid32);
 extern	void	udp_ntoh(struct netpacket *);
 extern	void	udp_hton(struct netpacket *);
 
-
 /* in file unsleep.c */
 extern	syscall	unsleep(pid32);
 
@@ -616,12 +616,12 @@ extern	void	xdone(void);
 /* in file yield.c */
 extern	syscall	yield(void);
 
-/* in file record_cpu.c ADDDD*/
-extern syscall record_cpu(pid32);
+/* in file record_cpuqdata.c ADDDD*/
+extern syscall record_cpuqdata(pid32);
 extern uint32 cputime();
 
-/* in file clear_cpudata.c */
-extern syscall clear_cpudata();
+/* in file clear_cpuqdata.c */
+extern syscall clear_cpuqdata();
 
 /* in file setenv.c */
 extern syscall setenv(uint32, uint32);

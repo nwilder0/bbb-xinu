@@ -2,10 +2,12 @@
 
 /* assume interrupts disabled ADDDD */
 
-syscall record_cpu(pid32 pid) {
+syscall record_cpuqdata(pid32 pid) {
 
-	if(pid!=0) state_times[proctab[pid].prstate] += (cputime() - (proctab[pid].timestatein));
-	proctab[pid].statetimes[proctab[pid].prstate] += (cputime() - (proctab[pid].timestatein));
+	if(!(proctab[pid].timestatein)) {
+		if(pid!=0) state_times[proctab[pid].prstate] += (cputime() - (proctab[pid].timestatein));
+		proctab[pid].statetimes[proctab[pid].prstate] += (cputime() - (proctab[pid].timestatein));
+	}
 	proctab[pid].timestatein = cputime();
 
 	return 0;

@@ -43,7 +43,7 @@ syscall	sleepms(
 		return SYSERR;
 	}
 
-	record_cpu(currpid);  /* ADDDD */
+	if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
 	proctab[currpid].prstate = PR_SLEEP;
 	resched();
 	restore(mask);

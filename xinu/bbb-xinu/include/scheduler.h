@@ -9,6 +9,7 @@
 
 #define QTYPE_INVALID -1
 #define QTYPE_DEFAULT 0
+#define QTYPE_PRIORITY 0
 #define QTYPE_SJF 1
 #define QTYPE_RAND 2
 
@@ -17,11 +18,16 @@
 #define ENV_VARS 5
 
 #define EV_VALUE_INVALID -1
+#define EV_VALUE_NO 0
+#define EV_VALUE_YES 1
+
 #define EV_BLANK 0
 #define EV_SCHEDULER 1
+#define EV_CPUQDATA 2
 
 extern char* env_vars[];
 extern char* env_vals[][];
+extern qid16 scratchlist;
 extern  uint32  *clktimems;  /* ADDDD */
 extern  uint32  state_times[PR_STATES]; /* ADDDD */
 extern  uint32  procs_finished; /* ADDDD */

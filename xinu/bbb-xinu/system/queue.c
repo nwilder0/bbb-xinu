@@ -50,3 +50,26 @@ pid32	dequeue(
 	queuetab[pid].qnext = EMPTY;
 	return pid;
 }
+
+/*------------------------------------------------------------------------
+ *  copyqueue  -  Move the internal queue linked list of pids from one
+ *  queue to another by pointing the internal list at the other queue's
+ *  first and last id's.  Any contents in the destination queue will be
+ *  dequeued first, and the source queue head and tail will be linked to
+ *  make the source queue empty.
+ *------------------------------------------------------------------------
+ */
+void copyqueue(qid16 srcq, qid16 destq) {
+
+	while(!isempty(destq)) dequeue(destq);
+
+	qid16 firstid = firstid(srcq);
+	qid16 lastid = lastid(srcq);
+	firstid(srcq) = queuetail(srcq);
+	lastid(srcq) = queuehead(srcq);
+
+	firstid(destq) = firstid;
+	queuetab[firstid].qprev = queuehead(destq);
+	lastid(destq) = lastid;
+	queuetab[lastid].qnext = queuetail(destq);
+}

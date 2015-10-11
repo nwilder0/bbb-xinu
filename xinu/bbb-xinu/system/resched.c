@@ -26,7 +26,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 		/* ADDDD */
-		switch(scheduler) {
+		switch(environment[EV_SCHEDULER]) {
 
 		case QTYPE_SJF:
 			ptold->prprio = (uint16)((ptold->timestatein - ptold->statetimes[PR_CURR]) & MASK_32to16);
@@ -36,7 +36,8 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 			ptold->prprio = (rand() % 99) + 1;
 			break;
 
-		case QTYPE_DEFAULT:
+		case QTYPE_PRIORITY:
+			ptold->prprio = ptold->prprio0;
 			break;
 		}
 
@@ -46,7 +47,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 		/* Old process will no longer remain current */
 
-		record_cpu(currpid);  /* ADDDD */
+		if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
 		ptold->prstate = PR_READY;
 		readycount++;
 		insert(currpid, readylist, ptold->prprio);
@@ -57,7 +58,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	currpid = dequeue(readylist);
 	readycount--;
 	ptnew = &proctab[currpid];
-	record_cpu(currpid);  /* ADDDD */
+	if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
 	ptnew->prstate = PR_CURR;
 	preempt = QUANTUM;		/* Reset time slice for process	*/
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);

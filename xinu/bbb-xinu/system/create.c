@@ -45,7 +45,9 @@ pid32	create(
 	prptr->prstate = PR_SUSP;	/* initial state is suspended	*/
 	prptr->timestatein = cputime(); /* ADDDD */
 	for(i=0; i<PR_STATES; i++) prptr->statetimes[i] = 0;  /* ADDDD */
+	prptr->prprio0 = priority;
 	prptr->prprio = priority;
+
 	prptr->prstkbase = (char *)saddr;
 	prptr->prstklen = ssize;
 	prptr->prname[PNMLEN-1] = NULLCH;

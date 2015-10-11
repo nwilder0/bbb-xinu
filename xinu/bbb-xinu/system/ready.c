@@ -21,12 +21,12 @@ status	ready(
 	/* Set process state to indicate ready and add to ready list */
 
 	prptr = &proctab[pid];
-	record_cpu(pid); /* ADDDD */
+	if(environment[EV_CPUQDATA]) record_cpuqdata(pid); /* ADDDD */
 	prptr->prstate = PR_READY;
 	readycount++;  /* ADDDD */
 
 	/* ADDDD */
-	switch(scheduler) {
+	switch(environment[EV_SCHEDULER]) {
 
 	case QTYPE_SJF:
 		prptr->prprio = (uint16)((cputime() - prptr->statetimes[PR_CURR]) & MASK_32to16);
@@ -36,7 +36,8 @@ status	ready(
 		prptr->prprio = (rand() % 99) + 1;
 		break;
 
-	case QTYPE_DEFAULT:
+	case QTYPE_PRIORITY:
+		prptr->prprio = prptr->prprio0;
 		break;
 	}
 	insert(pid, readylist, prptr->prprio);

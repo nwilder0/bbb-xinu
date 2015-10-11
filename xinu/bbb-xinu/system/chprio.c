@@ -23,6 +23,7 @@ pri16	chprio(
 	prptr = &proctab[pid];
 	oldprio = prptr->prprio;
 	prptr->prprio = newprio;
+	if(environment[EV_SCHEDULER]==QTYPE_PRIORITY) prptr->prprio0 = newprio;
 	restore(mask);
 	return oldprio;
 }

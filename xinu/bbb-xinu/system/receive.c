@@ -15,7 +15,7 @@ umsg32	receive(void)
 	mask = disable();
 	prptr = &proctab[currpid];
 	if (prptr->prhasmsg == FALSE) {
-		record_cpu(currpid);  /* ADDDD */
+		if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
 		prptr->prstate = PR_RECV;
 		resched();		/* Block until message arrives	*/
 	}

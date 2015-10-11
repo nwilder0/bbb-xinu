@@ -10,6 +10,16 @@ shellcmd xsh_cpu_use(int nargs, char *args[]) {
 		"free ", "curr ", "ready", "recv ", "sleep", "susp ",
 		"wait ", "rtime"};
 	uint32 statetimes[PR_STATES];
+
+	if(nargs > 1) {
+		if(!strncmp(args[1],"clear",5)) {
+			clear_cpuqdata();
+			printf("CPU Queue and Process State Data has been cleared.\n");
+			return 0;
+		}
+	}
+
+
 	for (i = 0; i<PR_STATES; i++) statetimes[i] = state_times[i];
 
 	for (i = 0; i < NPROC; i++) {

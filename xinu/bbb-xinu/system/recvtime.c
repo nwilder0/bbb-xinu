@@ -27,7 +27,7 @@ umsg32	recvtime(
 			restore(mask);
 			return SYSERR;
 		}
-		record_cpu(currpid);  /* ADDDD */
+		if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
 		prptr->prstate = PR_RECTIM;
 		resched();
 	}

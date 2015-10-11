@@ -32,8 +32,10 @@ syscall	kill(
 	freestk(prptr->prstkbase, prptr->prstklen);
 
 	/* ADDDD */
-	record_cpu(pid);
-	procs_finished++;
+	if(environment[EV_CPUQDATA]) {
+		record_cpuqdata(pid);
+		procs_finished++;
+	}
 
 	switch (prptr->prstate) {
 	case PR_CURR:
