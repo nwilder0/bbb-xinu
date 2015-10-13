@@ -11,8 +11,8 @@ uint32 *clktimems=NULL; /* ADDDD */
 
 void	clkhandler()
 {
-
 	static uint32 count1000 = 1000;	/* variable to count 1000ms */
+
 	volatile struct am335x_timer1ms *csrptr = 0x44E31000;
 					/* Pointer to timer CSR	    */
 
@@ -35,6 +35,9 @@ void	clkhandler()
 	if(count1000 == 0) {
 		clktime++;
 		count1000 = 1000;
+		if(envtab[EV_DTIMER].val && !(clktime%(envtab[EV_DTIMER].val))) {
+			dtimer();
+		}
 	}
 
 	/* ADDDD */

@@ -20,21 +20,21 @@ shellcmd xsh_set(int nargs, char *args[])
 			return OK;
 		} else {
 			uint32 ivar = -1;
-			char strval[50];
+			char strval[EV_MAX_VAL_LEN];
 			for(i=0;i<ENV_VARS;i++) {
-				if(!strncmp(env_vars[i],args[1],25)) {
+				if(!strncmp(envtab[i].name,args[1],EV_MAX_NAME_LEN)) {
 					ivar = i;
 				}
 			}
 
 			if(ivar!=-1) {
-				uint32 valcount = env_valcounts[ivar];
-				uint32 ival = environment[ivar];
+				uint32 valcount = envtab[ivar].valcount;
+				uint32 ival = envtab[ivar].val;
 
 				if(valcount) {
-					if((ival>=0) && (environment[ival]<valcount)) {
-						strncpy(strval,env_vals[ivar][ival],50);
-						strval[49]='\0';
+					if((ival>=0) && (ival<valcount)) {
+						strncpy(strval,envtab[ivar].vals[ival],EV_MAX_VAL_LEN);
+						strval[EV_MAX_VAL_LEN-1]='\0';
 					} else {
 						strncpy(strval,"INVALID\0",8);
 					}
@@ -49,33 +49,38 @@ shellcmd xsh_set(int nargs, char *args[])
 	// set or...
 	if(nargs == 4) {
 		if(!strncmp(args[2],"=",1)) {
-			char strvar[25], strval[50];
-			strncpy(strvar,args[1],24);
-			strvar[24]='\0';
-			strncpy(strval,args[3],49);
-			strval[49]='\0';
+			LOG("\nSetting value of %s for %s\n",args[3],args[1]);
+			char strvar[EV_MAX_NAME_LEN], strval[EV_MAX_VAL_LEN];
+			strncpy(strvar,args[1],EV_MAX_NAME_LEN);
+			strvar[EV_MAX_NAME_LEN-1]='\0';
+			strncpy(strval,args[3],EV_MAX_VAL_LEN);
+			strval[EV_MAX_VAL_LEN-1]='\0';
 
 			uint32 ivar = -1;
 			for(i=0;i<ENV_VARS;i++) {
-				if(!strncmp(env_vars[i],strvar,25)) {
+				if(!strncmp(envtab[i].name,args[1],EV_MAX_NAME_LEN)) {
 					ivar = i;
 				}
 			}
 
+			LOG("\nivar = %u\n",ivar);
 			if(ivar!=-1) {
+
+				uint32 valcount = envtab[ivar].valcount;
 				uint32 intval = atol(strval);
-				uint32 valcount = env_valcounts[ivar];
-				if(strncmp(strval,"0",1) && intval==0) intval = -1;
 
-				if(valcount && (intval == -1)) {
-					// loop thru and find the value
-					for(i=0;i<valcount;i++) {
-						if(!strncmp(strval,env_vals[ivar][i],50)) intval = i;
+				if(valcount) {
+
+					if(strncmp(strval,"0",1) && intval==0) {
+						// loop thru and find the value
+						for(i=0;i<valcount;i++) {
+							if(!(strncmp(strval,envtab[ivar].vals[i],EV_MAX_VAL_LEN))) intval = i;
+						}
 					}
+
+					if((intval < 0) || (intval >= valcount)) intval = -1;
 				}
-
-				if(intval < 0 || intval >= valcount) intval = -1;
-
+				LOG("\nnow setting setenv, intval = %u\n",intval);
 				setenv(ivar,intval);
 
 			}
@@ -86,18 +91,22 @@ shellcmd xsh_set(int nargs, char *args[])
 	printf("\n");
 
 	for(i=0; i<ENV_VARS; i++) {
-		char strvar[25], strval[50];
-		uint32 ival = environment[i];
+		char strvar[EV_MAX_NAME_LEN], strval[EV_MAX_VAL_LEN];
+		uint32 ival = envtab[i].val;
+		strval[0]='\0';
 
-		strncpy(strvar,env_vars[i],24);
-		strvar[24]='\0';
+		strncpy(strvar,envtab[i].name,EV_MAX_NAME_LEN);
+		strvar[EV_MAX_NAME_LEN-1]='\0';
 
-		if((ival>env_valcounts[i])||(ival<0)) {
+		if((envtab[i].valcount<1) || !(envtab[i].vals)) {
+
+		} else if((ival>envtab[i].valcount) || (ival<0)) {
 			strncpy(strval,"INVALID\0",8);
 		} else {
-			strncpy(strval,env_vals[i][ival],49);
+			strncpy(strval,envtab[i].vals[ival],EV_MAX_VAL_LEN);
+			strval[EV_MAX_VAL_LEN-1]='\0';
 		}
-		printf("  %s = %s (%u)\n",strvar,strval,ival);
+		printf("  %s = %u (%s)\n",strvar,ival,strval);
 	}
 	printf("\n");
 

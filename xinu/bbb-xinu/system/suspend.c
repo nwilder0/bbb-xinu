@@ -27,7 +27,7 @@ syscall	suspend(
 		restore(mask);
 		return SYSERR;
 	}
-	if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
+	record_cpuqdata(currpid);  /* ADDDD */
 	if (prptr->prstate == PR_READY) {
 		getitem(pid);		    /* Remove a ready process	*/
 					    /*   from the ready list	*/

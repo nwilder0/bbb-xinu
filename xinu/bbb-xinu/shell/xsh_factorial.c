@@ -12,7 +12,7 @@ shellcmd xsh_factorial(int nargs, char *args[])
 
 	int n = 0;
 	int intFact = 0;
-	long result = 1;
+	int result = 1;
 	int intRepeat = 0;
 	char *charPrint = NULL;
 
@@ -70,8 +70,10 @@ shellcmd xsh_factorial(int nargs, char *args[])
 	}
 	printf("Calculating factorial for %d, %d time(s)\n",intFact,intRepeat+1);
 	do {
-		int i = 1;
-		for(i = 1; i<=intFact; i++) result *= i;
+		int i;
+		for(i = 1; i<=intFact; i++) {
+			result *= i;
+		}
 		if(percentCount >= 1) {
 			printf(charPrint, result);
 			printf("\n");

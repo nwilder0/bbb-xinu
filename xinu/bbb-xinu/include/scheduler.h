@@ -3,38 +3,40 @@
 #ifndef INCLUDE_SCHEDULER_H_
 #define INCLUDE_SCHEDULER_H_
 
-#define PR_STATES 8
+#ifndef PR_STATES
+#define	PR_STATES		8
+#endif
 
-#define QTYPE_VALS 3
+#ifndef QTYPE_VALS
+#define	QTYPE_VALS 		3
+#endif
 
-#define QTYPE_INVALID -1
-#define QTYPE_DEFAULT 0
-#define QTYPE_PRIORITY 0
-#define QTYPE_SJF 1
-#define QTYPE_RAND 2
+#define QTYPE_INVALID 	-1
+#define QTYPE_DEFAULT 	0
+#define QTYPE_PRIORITY 	0
+#define QTYPE_SJF 		1
+#define QTYPE_RAND 		2
+
+#define CPUQDATA_DEFAULT FALSE
 
 #define MASK_32to16 0x0000FFFF
 
-#define ENV_VARS 5
+#define INT16(u) (u%32768)
 
-#define EV_VALUE_INVALID -1
-#define EV_VALUE_NO 0
-#define EV_VALUE_YES 1
+#define zerotime(t) do{t.secs = 0; t.ms = 0;} while(0)
+#define addtime(t1,t2) do{t1.secs += t2.secs + (t1.ms + t2.ms)/(60); t1.ms = (t1.ms + t2.ms)%60;} while(0)
+#define negtime(t1,t2) do{if(t1.ms < t2.ms) {t1.secs--; t1.ms += 1000;} t1.secs -= t2.secs; t1.ms -= t2.ms; } while(0)
+#define prttime(t1) (t1.secs * 1000 + t1.ms)
+#define eqtime(t1,t2) ((t1.secs == t2.secs) && (t1.ms == t2.ms))
 
-#define EV_BLANK 0
-#define EV_SCHEDULER 1
-#define EV_CPUQDATA 2
+#define NOW (cputime())?(_mstime_now):(_mstime_now)
 
-extern char* env_vars[];
-extern char* env_vals[][];
-extern qid16 scratchlist;
+extern  qid16 	scratchlist;
 extern  uint32  *clktimems;  /* ADDDD */
-extern  uint32  state_times[PR_STATES]; /* ADDDD */
-extern  uint32  procs_finished; /* ADDDD */
+extern  mstime state_times[QTYPE_VALS][PR_STATES]; /* ADDDD */
+extern  uint32  procs_finished[QTYPE_VALS]; /* ADDDD */
 extern  uint16  readycount;
-
-extern uint32 environment[ENV_VARS];
-
-
+extern	mstime  _mstime_now;
+extern	mstime	ztime;
 
 #endif /* INCLUDE_SCHEDULER_H_ */

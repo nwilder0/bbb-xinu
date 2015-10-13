@@ -12,7 +12,7 @@ syscall	kill(
 {
 	intmask	mask;			/* Saved interrupt mask		*/
 	struct	procent *prptr;		/* Ptr to process' table entry	*/
-	int32	i;			/* Index into descriptors	*/
+	int32	i,j;			/* Index into descriptors	*/
 
 	mask = disable();
 	if (isbadpid(pid) || (pid == NULLPROC)
@@ -32,15 +32,24 @@ syscall	kill(
 	freestk(prptr->prstkbase, prptr->prstklen);
 
 	/* ADDDD */
-	if(environment[EV_CPUQDATA]) {
-		record_cpuqdata(pid);
-		procs_finished++;
+	LOG("\nkill() about to chk for record\n");
+	record_cpuqdata(pid);
+	for(i=0;i<QTYPE_VALS;i++) {
+		for(j=0;j<PR_STATES;j++) {
+			mstime *tmptime = &(prptr->statetimes[i][j]);
+			if(tmptime->secs || tmptime->ms) {
+				procs_finished[i]++;
+				break;
+			}
+
+		}
 	}
 
 	switch (prptr->prstate) {
 	case PR_CURR:
 		prptr->prstate = PR_FREE;	/* Suicide */
 		resched();
+		break;
 
 	case PR_SLEEP:
 	case PR_RECTIM:

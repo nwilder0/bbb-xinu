@@ -34,6 +34,8 @@ typedef int32	process;	/* top-level function of a process	*/
 typedef	void	interrupt;	/* interrupt procedure			*/
 typedef	int32	status;		/* returned status value (OK/SYSERR)	*/
 
+typedef struct _mstime { uint32 secs; uint32 ms; } mstime;
+
 #define local	static		/* Local procedure or variable declar.	*/
 
 /* Boolean constants */

@@ -17,7 +17,9 @@
 #define	PR_WAIT		6	/* Process is on semaphore queue	*/
 #define	PR_RECTIM	7	/* Process is receiving with timeout	*/
 
-#define PR_STATES 8 /* ADDDD */
+#define PR_STATES 	8 /* ADDDD */
+
+#define QTYPE_VALS 	3
 
 /* Miscellaneous process definitions */
 
@@ -55,8 +57,8 @@ struct procent {		/* Entry in the process table		*/
 	umsg32	prmsg;		/* Message sent to this process		*/
 	bool8	prhasmsg;	/* Nonzero iff msg is valid		*/
 	int16	prdesc[NDESC];	/* Device descriptors for process	*/
-	uint32  timestatein; /* Time in current state ADDDD*/
-	uint32  statetimes[PR_STATES]; /* ADDDD */
+	mstime  timestatein; /* Time in current state ADDDD*/
+	mstime  statetimes[QTYPE_VALS][PR_STATES]; /* ADDDD */
 };
 
 /* Marker for the top of a process stack (used to help detect overflow)	*/
@@ -65,3 +67,4 @@ struct procent {		/* Entry in the process table		*/
 extern	struct	procent proctab[];
 extern	int32	prcount;	/* Currently active processes		*/
 extern	pid32	currpid;	/* Currently executing process		*/
+

@@ -77,13 +77,13 @@ extern	shellcmd  xsh_help	(int32, char *[]);
 extern	shellcmd  xsh_factorial (int32, char *[]);
 
 /* in file xsh_repeat.c */
-extern shellcmd xsh_repeat (int32, char *[]);
+extern 	shellcmd  xsh_repeat (int32, char *[]);
 
 /* in file xsh_cpu_use.c */
-extern shellcmd xsh_cpu_use(int32, char *[]);
+extern 	shellcmd  xsh_cpu_use(int32, char *[]);
 
 /* in file xsh_factwait.c */
-extern shellcmd xsh_factwait(int32, char *[]);
+extern 	shellcmd  xsh_factwait(int32, char *[]);
 
 /* in file xsh_set.c */
-extern shellcmd xsh_set(int32, char *[]);
+extern 	shellcmd  xsh_set(int32, char *[]);

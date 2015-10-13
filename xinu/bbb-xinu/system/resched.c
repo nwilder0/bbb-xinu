@@ -24,41 +24,33 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	ptold = &proctab[currpid];
 
+	//LOG("\nResched() step 1\n");
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 		/* ADDDD */
-		switch(environment[EV_SCHEDULER]) {
 
-		case QTYPE_SJF:
-			ptold->prprio = (uint16)((ptold->timestatein - ptold->statetimes[PR_CURR]) & MASK_32to16);
-			break;
-
-		case QTYPE_RAND:
-			ptold->prprio = (rand() % 99) + 1;
-			break;
-
-		case QTYPE_PRIORITY:
-			ptold->prprio = ptold->prprio0;
-			break;
-		}
+		ptold->prprio = setprio(currpid);
 
 		if (ptold->prprio > firstkey(readylist)) {
+			//LOG("\nResched(): top ps remains\n");
 			return;
 		}
 
 		/* Old process will no longer remain current */
+		LOG("\nResched(): ready to record qdata\n");
 
-		if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
+		record_cpuqdata(currpid);  /* ADDDD */
 		ptold->prstate = PR_READY;
 		readycount++;
 		insert(currpid, readylist, ptold->prprio);
 	}
 
 	/* Force context switch to highest priority ready process */
-
 	currpid = dequeue(readylist);
+	LOG("\nResched(): new curr ps is pid = %d\n",currpid);
 	readycount--;
 	ptnew = &proctab[currpid];
-	if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
+
+	record_cpuqdata(currpid);  /* ADDDD */
 	ptnew->prstate = PR_CURR;
 	preempt = QUANTUM;		/* Reset time slice for process	*/
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);

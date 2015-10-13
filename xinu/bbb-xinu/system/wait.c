@@ -28,7 +28,8 @@ syscall	wait(
 
 	if (--(semptr->scount) < 0) {		/* If caller must block	*/
 		prptr = &proctab[currpid];
-		if(environment[EV_CPUQDATA]) record_cpuqdata(currpid);  /* ADDDD */
+		LOG("\nwait() deciding on record\n");
+		record_cpuqdata(currpid);  /* ADDDD */
 		prptr->prstate = PR_WAIT;	/* Set state to waiting	*/
 		prptr->prsem = sem;		/* Record semaphore ID	*/
 		enqueue(currpid,semptr->squeue);/* Enqueue on semaphore	*/

@@ -617,14 +617,23 @@ extern	void	xdone(void);
 extern	syscall	yield(void);
 
 /* in file record_cpuqdata.c ADDDD*/
-extern syscall record_cpuqdata(pid32);
-extern uint32 cputime();
+extern syscall 	record_cpuqdata(pid32);
+extern uint8 	cputime();
+extern void		dtimer();
 
 /* in file clear_cpuqdata.c */
-extern syscall clear_cpuqdata();
+extern syscall 	clear_cpuqdata();
 
 /* in file setenv.c */
-extern syscall setenv(uint32, uint32);
+extern syscall 	setenv(uint32, uint32);
+
+/* in file sets.c */
+extern syscall 	set_scheduler(struct envvar *, uint32);
+extern syscall 	set_cpuqdata(struct envvar *, uint32);
+
+/* in file setprio.c */
+extern syscall setprio(pid32);
+
 
 /* NETWORK BYTE ORDER CONVERSION NOT NEEDED ON A BIG-ENDIAN COMPUTER */
 #define	htons(x)   ( ( 0xff & ((x)>>8) ) | ( (0xff & (x)) << 8 ) )

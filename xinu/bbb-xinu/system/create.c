@@ -23,7 +23,7 @@ pid32	create(
 	intmask 	mask;    	/* interrupt mask		*/
 	pid32		pid;		/* stores new process id	*/
 	struct	procent	*prptr;		/* pointer to proc. table entry */
-	int32		i;
+	int32		i,j;
 	uint32		*a;		/* points to list of args	*/
 	uint32		*saddr;		/* stack address		*/
 
@@ -43,8 +43,15 @@ pid32	create(
 
 	/* initialize process table entry for new process */
 	prptr->prstate = PR_SUSP;	/* initial state is suspended	*/
-	prptr->timestatein = cputime(); /* ADDDD */
-	for(i=0; i<PR_STATES; i++) prptr->statetimes[i] = 0;  /* ADDDD */
+
+	prptr->timestatein = NOW; /* ADDDD */
+
+	for(i = 0; i < QTYPE_VALS; i++) {
+		for(j = 0; j < PR_STATES; j++) {
+			prptr->statetimes[i][j] = ztime;
+		}
+	}
+
 	prptr->prprio0 = priority;
 	prptr->prprio = priority;
 

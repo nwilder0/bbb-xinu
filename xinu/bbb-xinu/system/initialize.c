@@ -26,13 +26,22 @@ struct	memblk	memlist;	/* List of free memory blocks		*/
 int	prcount;		/* Total number of live processes	*/
 pid32	currpid;		/* ID of currently executing process	*/
 
-uint32 state_times[PR_STATES]; /* ADDDD */
-uint32 procs_finished; /* ADDDD */
+mstime state_times[QTYPE_VALS][PR_STATES]; /* ADDDD */
+uint32 procs_finished[QTYPE_VALS]; /* ADDDD */
 uint16 readycount; /*  ADDDD */
-uint32 environment[ENV_VARS];
-const char* env_vars[] = {"environment","scheduler","cpuqdata","unused","unused"};
-const uint32 env_valcounts[] = {0,3,2,0,0};
-const char* env_vals[][] = {{},{"priority","shortest job first","random"},{"yes","no"},{},{}};
+
+mstime ztime = {0,0};
+
+struct envvar envtab[ENV_VARS] =
+{
+		{ 0, "environment\0", 0, NULL, ENV_VARS, NULL },
+		{ 1, "scheduler\0", QTYPE_VALS, (char *[]){"priority\0","shortest-job-first\0","random\0"},
+				QTYPE_DEFAULT, (void *)set_scheduler },
+		{ 2, "cpuqdata\0", 2, (char *[]){"no\0", "yes\0"}, CPUQDATA_DEFAULT, (void *)set_cpuqdata },
+		{ 3, "debug\0", 2, (char *[]){"no\0", "yes\0"}, DEBUG_DEFAULT, NULL },
+		{ 4, "dtimer\0", 0, NULL, DTIMER_DEFAULT, NULL }
+};
+
 qid16 scratchlist;
 
 /*------------------------------------------------------------------------
@@ -115,7 +124,7 @@ void	nulluser()
 static	void	sysinit()
 {
 	//kprintf("sysinit()\n");
-	int32	i;
+	int32	i,j;
 	struct	procent	*prptr;		/* Ptr to process table entry	*/
 	struct	sentry	*semptr;	/* Prr to semaphore table entry	*/
 
@@ -136,12 +145,6 @@ static	void	sysinit()
 
 	/* Initialize system variables */
 
-	/*  ADDDD */
-	for(i=0;i<ENV_VARS;i++) environment[i] = EV_VALUE_INVALID;
-
-	environment[EV_SCHEDULER] = QTYPE_DEFAULT;
-	environment[EV_CPUQDATA] = EV_VALUE_NO;
-
 	/* ADDDD */
 	readycount = 0;
 
@@ -157,10 +160,13 @@ static	void	sysinit()
 	kprintf("init state_times\n");
 
 	/* ADDDD */
-	for(i = 0; i < PR_STATES; i++) {
-		state_times[i] = 0;
+	for(i = 0; i < QTYPE_VALS; i++) {
+		for(j = 0; j < PR_STATES; j++) {
+			zerotime(state_times[i][j]);
+		}
+		procs_finished[i] = 0;
 	}
-	procs_finished = 0;
+
 
 	/* Initialize process table entries free */
 	kprintf("init proctab\n");
@@ -178,10 +184,14 @@ static	void	sysinit()
 
 	prptr = &proctab[NULLPROC];
 	prptr->prstate = PR_CURR;
-	prptr->timestatein = 0;		/* ADDDD */
+	prptr->timestatein = ztime;		/* ADDDD */
 
 	kprintf("init null proc state times\n");
-	for(i=0; i<PR_STATES; i++) prptr->statetimes[i] = 0;
+	for(i = 0; i < QTYPE_VALS; i++) {
+		for(j = 0; j < PR_STATES; j++) {
+			prptr->statetimes[i][j] = ztime;
+		}
+	}
 	prptr->prprio = 0;
 	prptr->prprio0 = 0; /* set initial provided priority, used when moving back to priority queuing */
 	strncpy(prptr->prname, "prnull", 7);

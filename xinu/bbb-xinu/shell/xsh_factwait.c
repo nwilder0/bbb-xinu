@@ -17,12 +17,12 @@ shellcmd xsh_factwait(int nargs, char *args[])
 
 	if(nargs>1) {
 		wait_t = atol(args[1]);
-		if(wait_t<1 || wait_t>(60*1000)) wait_t = 100;
+		if(wait_t<0 || wait_t>(60*1000)) wait_t = 100;
 	}
 
 	while(1) {
 		for(i=n;i>0;i--) f*=i;
-		sleepms(wait_t);
+		if(wait_t) sleepms(wait_t);
 	}
 
 	return 0;

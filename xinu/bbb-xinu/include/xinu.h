@@ -3,6 +3,7 @@
 #include <kernel.h>
 #include <conf.h>
 #include <process.h>
+#include <environment.h>
 #include <queue.h>
 #include <resched.h>
 #include <semaphore.h>
@@ -41,5 +42,7 @@
 #include <armv7a.h>
 #include <scheduler.h>
 #include <stdlib.h>
+
+
 
 
