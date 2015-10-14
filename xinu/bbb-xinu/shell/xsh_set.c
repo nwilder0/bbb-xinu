@@ -11,6 +11,7 @@ shellcmd xsh_set(int nargs, char *args[])
 {
 	int32	i;
 
+	/* if  1 arg and it is '--help' then print the help */
 	if(nargs==2) {
 		if(!strncmp(args[1],"--help",6)) {
 			printf("This command prints or sets the system environment values that are dynamically changeable.\n\n");
@@ -18,6 +19,7 @@ shellcmd xsh_set(int nargs, char *args[])
 			printf("Display one value syntax: set [setting name]\n");
 			printf("Set one value syntax: set [setting name] = [setting value]\n\n");
 			return OK;
+		/* else if one arg, then find and output just that env var */
 		} else {
 			uint32 ivar = -1;
 			char strval[EV_MAX_VAL_LEN];
@@ -46,7 +48,10 @@ shellcmd xsh_set(int nargs, char *args[])
 		}
 	}
 
-	// set or...
+	// 4 args sounds like a set attempt
+	// find the env var, find any alias and verify there's a equal sign in between
+	// then if all is good, call setenv(var, val) to actually change things
+
 	if(nargs == 4) {
 		if(!strncmp(args[2],"=",1)) {
 			LOG("\nSetting value of %s for %s\n",args[3],args[1]);
@@ -87,7 +92,8 @@ shellcmd xsh_set(int nargs, char *args[])
 		}
 	}
 
-	// display
+	// no matter what parameters were provided lets display all the env vars
+	// with their values
 	printf("\n");
 
 	for(i=0; i<ENV_VARS; i++) {

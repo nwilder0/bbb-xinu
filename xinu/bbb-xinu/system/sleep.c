@@ -42,8 +42,9 @@ syscall	sleepms(
 		restore(mask);
 		return SYSERR;
 	}
-	LOG("\nsleep(): deciding on record\n");
-	record_cpuqdata(currpid);  /* ADDDD */
+
+	record_cpuqdata(currpid);  /* call function to record process state time data */
+							   /* (actual recording is controlled by EV_CPUQDATA env var and choice of scheduler) */
 	proctab[currpid].prstate = PR_SLEEP;
 	resched();
 	restore(mask);

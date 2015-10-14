@@ -31,9 +31,12 @@ syscall	kill(
 	}
 	freestk(prptr->prstkbase, prptr->prstklen);
 
-	/* ADDDD */
-	LOG("\nkill() about to chk for record\n");
-	record_cpuqdata(pid);
+	record_cpuqdata(pid);  /* call function to record process state time data */
+						   /* (actual recording is controlled by EV_CPUQDATA env var and choice of scheduler) */
+
+	/* check the process state counters and update the finished procs global counter for the current scheduler */
+	/* if and only if the process actually spent any time in any of the states (i.e. moving among any of the states */
+	/* while this scheduler was active */
 	for(i=0;i<QTYPE_VALS;i++) {
 		for(j=0;j<PR_STATES;j++) {
 			mstime *tmptime = &(prptr->statetimes[i][j]);

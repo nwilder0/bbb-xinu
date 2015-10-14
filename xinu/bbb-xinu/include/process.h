@@ -17,9 +17,9 @@
 #define	PR_WAIT		6	/* Process is on semaphore queue	*/
 #define	PR_RECTIM	7	/* Process is receiving with timeout	*/
 
-#define PR_STATES 	8 /* ADDDD */
+#define PR_STATES 	8   /* a count of the above states */
 
-#define QTYPE_VALS 	3
+#define QTYPE_VALS 	3	/* the number of scheduling algorithms that are defined */
 
 /* Miscellaneous process definitions */
 
@@ -47,7 +47,8 @@
 struct procent {		/* Entry in the process table		*/
 	uint16	prstate;	/* Process state: PR_CURR, etc.		*/
 	pri16	prprio;		/* Process priority			*/
-	pri16	prprio0;	/* Process initial provided priority */
+	pri16	prprio0;	/* Process initial provided priority, */
+		/* used to restore priority when changing back from another scheduling algorithm */
 	char	*prstkptr;	/* Saved stack pointer			*/
 	char	*prstkbase;	/* Base of run time stack		*/
 	uint32	prstklen;	/* Stack length in bytes		*/
@@ -57,8 +58,9 @@ struct procent {		/* Entry in the process table		*/
 	umsg32	prmsg;		/* Message sent to this process		*/
 	bool8	prhasmsg;	/* Nonzero iff msg is valid		*/
 	int16	prdesc[NDESC];	/* Device descriptors for process	*/
-	mstime  timestatein; /* Time in current state ADDDD*/
-	mstime  statetimes[QTYPE_VALS][PR_STATES]; /* ADDDD */
+	mstime  timestatein; /* Time the process entered the current state */
+	/* counters that track how much time a process spends in each state by scheduling algorithm */
+	mstime  statetimes[QTYPE_VALS][PR_STATES];
 };
 
 /* Marker for the top of a process stack (used to help detect overflow)	*/

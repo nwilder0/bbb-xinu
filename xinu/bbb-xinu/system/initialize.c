@@ -26,12 +26,13 @@ struct	memblk	memlist;	/* List of free memory blocks		*/
 int	prcount;		/* Total number of live processes	*/
 pid32	currpid;		/* ID of currently executing process	*/
 
-mstime state_times[QTYPE_VALS][PR_STATES]; /* ADDDD */
-uint32 procs_finished[QTYPE_VALS]; /* ADDDD */
-uint16 readycount; /*  ADDDD */
+mstime state_times[QTYPE_VALS][PR_STATES]; /* global process state counters to track time spent in a state */
+uint32 procs_finished[QTYPE_VALS]; /* global counters of processes that have completed execution */
+uint16 readycount; /* counter to track the current number in the readyqueue */
 
-mstime ztime = {0,0};
+mstime ztime = {0,0}; /* mstime zero element */
 
+/* the environment variables table */
 struct envvar envtab[ENV_VARS] =
 {
 		{ 0, "environment\0", 0, NULL, ENV_VARS, NULL },
@@ -42,6 +43,7 @@ struct envvar envtab[ENV_VARS] =
 		{ 4, "dtimer\0", 0, NULL, DTIMER_DEFAULT, NULL }
 };
 
+/* temporary queue used to reorganize other queues */
 qid16 scratchlist;
 
 /*------------------------------------------------------------------------
@@ -123,7 +125,6 @@ void	nulluser()
  */
 static	void	sysinit()
 {
-	//kprintf("sysinit()\n");
 	int32	i,j;
 	struct	procent	*prptr;		/* Ptr to process table entry	*/
 	struct	sentry	*semptr;	/* Prr to semaphore table entry	*/
@@ -132,34 +133,34 @@ static	void	sysinit()
 
 	platinit();
 
-	kprintf("initevec()\n");
+	LOG("initevec()\n");
 	/* Initialize the interrupt vectors */
 
 	initevec();
 	
 	/* Initialize free memory list */
-	kprintf("meminit()\n");
+	LOG("meminit()\n");
 
 	meminit();
-	kprintf("init system vars\n");
+	LOG("init system vars\n");
 
 	/* Initialize system variables */
 
-	/* ADDDD */
+	/* intialize the readylist count tracker */
 	readycount = 0;
 
 	/* Count the Null process as the first process in the system */
 
 	prcount = 1;
 
-	kprintf("defer is next\n");
+	LOG("defer is next\n");
 	/* Scheduling is not currently blocked */
 
 	Defer.ndefers = 0;
 
-	kprintf("init state_times\n");
+	LOG("init state_times\n");
 
-	/* ADDDD */
+	/* initialize the global scheduler data counters */
 	for(i = 0; i < QTYPE_VALS; i++) {
 		for(j = 0; j < PR_STATES; j++) {
 			zerotime(state_times[i][j]);
@@ -169,7 +170,7 @@ static	void	sysinit()
 
 
 	/* Initialize process table entries free */
-	kprintf("init proctab\n");
+	LOG("init proctab\n");
 
 	for (i = 0; i < NPROC; i++) {
 		prptr = &proctab[i];
@@ -180,13 +181,15 @@ static	void	sysinit()
 	}
 
 	/* Initialize the Null process entry */	
-	kprintf("init null proc()\n");
+	LOG("init null proc()\n");
 
 	prptr = &proctab[NULLPROC];
 	prptr->prstate = PR_CURR;
-	prptr->timestatein = ztime;		/* ADDDD */
+	prptr->timestatein = ztime;		/* initialize the state entered timestamp to 0 */
 
-	kprintf("init null proc state times\n");
+	LOG("init null proc state times\n");
+
+	/* initialize all the null process' state counters to 0 */
 	for(i = 0; i < QTYPE_VALS; i++) {
 		for(j = 0; j < PR_STATES; j++) {
 			prptr->statetimes[i][j] = ztime;
@@ -201,7 +204,7 @@ static	void	sysinit()
 	currpid = NULLPROC;
 	
 	/* Initialize semaphores */
-	kprintf("init sem queues()\n");
+	LOG("init sem queues()\n");
 
 	for (i = 0; i < NSEM; i++) {
 		semptr = &semtab[i];
@@ -211,24 +214,24 @@ static	void	sysinit()
 	}
 
 	/* Initialize buffer pools */
-	kprintf("bufinit()\n");
+	LOG("bufinit()\n");
 
 	bufinit();
 
 	/* Create a ready list for processes */
-	kprintf("readylist\n");
+	LOG("readylist\n");
 	readylist = newqueue();
 
 	/* Create a scratch queue for temporary purposes, should only be used inside a syscall with interrupts disabled */
 	scratchlist = newqueue();
 
 	/* Initialize the real time clock */
-	kprintf("clkinit()\n");
+	LOG("clkinit()\n");
 	clkinit();
 
-	kprintf("init devs\n");
+	LOG("init devs\n");
 	for (i = 0; i < NDEVS; i++) {
-		kprintf("init dev %d\n",i);
+		LOG("init dev %d\n",i);
 		init(i);
 	}
 	return;

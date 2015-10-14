@@ -1,7 +1,14 @@
+/* xsh_cpu_use.c - xsh_cpu_use */
+
 #include <xinu.h>
 #include <stdio.h>
 
-/* ADDDD */
+/*------------------------------------------------------------------------
+ * xsh_cpu_use - display the status of all the process state counters for
+ * running processes as well as all the global counters.  A parameter of
+ * 'clear' will reset all the counters.
+ *------------------------------------------------------------------------
+ */
 
 shellcmd xsh_cpu_use(int nargs, char *args[]) {
 	int i,j,k;
@@ -33,6 +40,7 @@ shellcmd xsh_cpu_use(int nargs, char *args[]) {
 		}
 	}
 
+	/* this is the new output format, similar to the ps shell cmd output */
 	if(nargs==1) {
 
 		for(k=0;k<QTYPE_VALS;k++) {
@@ -74,7 +82,7 @@ shellcmd xsh_cpu_use(int nargs, char *args[]) {
 		}
 		printf("\n");
 
-
+	/* this is the old output format */
 	} else if(!strncmp(args[1],"all\0",3)) {
 
 		for (i = 0; i < NPROC; i++) {

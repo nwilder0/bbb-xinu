@@ -21,12 +21,13 @@ status	ready(
 	/* Set process state to indicate ready and add to ready list */
 
 	prptr = &proctab[pid];
-	LOG("\nReady(): ready to record qdata; flag is %d\n",envtab[EV_CPUQDATA].val);
-	record_cpuqdata(pid); /* ADDDD */
-	prptr->prstate = PR_READY;
-	readycount++;  /* ADDDD */
 
-	/* ADDDD */
+	record_cpuqdata(pid);  /* call function to record process state time data */
+							   /* (actual recording is controlled by EV_CPUQDATA env var and choice of scheduler) */
+	prptr->prstate = PR_READY;
+	readycount++;  /* increase the readylist count tracker */
+
+	/* assigns a new adjusted priority based on the scheduler currently active */
 	prptr->prprio = setprio(pid);
 
 	insert(pid, readylist, prptr->prprio);

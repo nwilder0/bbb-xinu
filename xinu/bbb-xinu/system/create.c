@@ -44,8 +44,9 @@ pid32	create(
 	/* initialize process table entry for new process */
 	prptr->prstate = PR_SUSP;	/* initial state is suspended	*/
 
-	prptr->timestatein = NOW; /* ADDDD */
+	prptr->timestatein = NOW; /* initialize the process state timestamp to the current time */
 
+	/* initialize the state time counters to zero */
 	for(i = 0; i < QTYPE_VALS; i++) {
 		for(j = 0; j < PR_STATES; j++) {
 			prptr->statetimes[i][j] = ztime;

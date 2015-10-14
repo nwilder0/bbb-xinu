@@ -8,7 +8,7 @@
  */
 syscall	setenv(uint32 var, uint32 val) {
 
-	LOG("\nEntering setenv step 1\n");
+	// if the var value is invalid return error
 	if(var < 0 || var >= ENV_VARS) return SYSERR;
 
 	intmask	mask;			/* Saved interrupt mask		*/
@@ -18,13 +18,16 @@ syscall	setenv(uint32 var, uint32 val) {
 	struct envvar *varptr = &envtab[var];
 
 	long int retval=OK;
-	LOG("\nsetenv step 2\n");
+
+	// if the custom set function exists, then use it
 	if((varptr->set) != NULL) {
 
+		// capture the env var's set function return value for better error detection
 		retval = varptr->set(varptr, val);
 
 	} else {
 
+		//otherwise just do a simple integer assignment
 		varptr->val = val;
 
 	}

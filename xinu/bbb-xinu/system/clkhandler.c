@@ -7,7 +7,7 @@
  *-----------------------------------------------------------------------
  */
 
-uint32 *clktimems=NULL; /* ADDDD */
+uint32 *clktimems=NULL; /* a pointer to the static millisecond tracker inside the clock handler */
 
 void	clkhandler()
 {
@@ -35,12 +35,14 @@ void	clkhandler()
 	if(count1000 == 0) {
 		clktime++;
 		count1000 = 1000;
+
+		/* if EV_DTIMER env var is turned on then run the associated debugging output on a psuedo timer */
 		if(envtab[EV_DTIMER].val && !(clktime%(envtab[EV_DTIMER].val))) {
 			dtimer();
 		}
 	}
 
-	/* ADDDD */
+	/* if still NULL, update the pointer to the millisecond tracker so millisecond timestamps can be generated */
 	if(!clktimems) {
 		clktimems = &count1000;
 	}

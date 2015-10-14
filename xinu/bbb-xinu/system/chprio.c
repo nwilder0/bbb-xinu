@@ -23,6 +23,7 @@ pri16	chprio(
 	prptr = &proctab[pid];
 	oldprio = prptr->prprio;
 	prptr->prprio = newprio;
+	/* if priority scheduling is in effect, then update the initial priority value as well */
 	if(envtab[EV_SCHEDULER].val==QTYPE_PRIORITY) prptr->prprio0 = newprio;
 	restore(mask);
 	return oldprio;

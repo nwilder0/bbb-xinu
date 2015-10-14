@@ -15,7 +15,9 @@ umsg32	receive(void)
 	mask = disable();
 	prptr = &proctab[currpid];
 	if (prptr->prhasmsg == FALSE) {
-		record_cpuqdata(currpid);  /* ADDDD */
+
+		record_cpuqdata(currpid);  /* call function to record process state time data */
+								   /* (actual recording is controlled by EV_CPUQDATA env var and choice of scheduler) */
 		prptr->prstate = PR_RECV;
 		resched();		/* Block until message arrives	*/
 	}
