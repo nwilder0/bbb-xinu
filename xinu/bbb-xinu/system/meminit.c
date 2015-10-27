@@ -21,8 +21,14 @@ void	meminit(void)
 	/* Initialize the memory list as one big block */
 
 	memlist.mnext = (struct memblk *)minheap;
+	memlist.mprev = (struct memblk *)minheap;
 	memptr = memlist.mnext;
 
-	memptr->mnext = (struct memblk *)NULL;
+	memptr->mprev = &memlist;
+	memptr->mnext = &memlist;
 	memptr->mlength = (uint32)maxheap - (uint32)minheap;
+
+	memlist.mnextsz = memptr;
+	memptr->mnextsz = (struct memblk *)NULL;
+
 }

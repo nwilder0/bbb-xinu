@@ -11,7 +11,7 @@ char  	*getstk(
 	)
 {
 	intmask	mask;			/* Saved interrupt mask		*/
-	struct	memblk	*prev, *curr;	/* Walk through memory list	*/
+	struct	memblk	*prev, *curr, *next;	/* Walk through memory list	*/
 	struct	memblk	*fits, *fitsprev; /* Record block that fits	*/
 
 	mask = disable();
@@ -23,17 +23,20 @@ char  	*getstk(
 	nbytes = (uint32) roundmb(nbytes);	/* Use mblock multiples	*/
 
 	prev = &memlist;
-	curr = memlist.mnext;
+	curr = memlist.mprev;
 	fits = NULL;
 	fitsprev = NULL;  /* Just to avoid a compiler warning */
 
-	while (curr != NULL) {			/* Scan entire list	*/
+	while (curr != &memlist) {			/* Scan entire list	*/
 		if (curr->mlength >= nbytes) {	/* Record block address	*/
-			fits = curr;		/*   when request fits	*/
-			fitsprev = prev;
+			if((envtab[EV_MEMALLOC].val == MEMALLOC_FIRSTFIT) || (fits == NULL) ||
+					(curr->mlength == nbytes) || (fits->mlength > curr->mlength)) {
+				fits = curr;		/*   when request fits	*/
+				fitsprev = prev;
+			}
 		}
-		prev = curr;
-		curr = curr->mnext;
+		next = curr;
+		curr = curr->mprev;
 	}
 
 	if (fits == NULL) {			/* No block was found	*/
@@ -42,7 +45,10 @@ char  	*getstk(
 	}
 	if (nbytes == fits->mlength) {		/* Block is exact match	*/
 		fitsprev->mnext = fits->mnext;
+		next = fits->mnext;
+		next->mprev = fitsprev;
 	} else {				/* Remove top section	*/
+
 		fits->mlength -= nbytes;
 		fits = (struct memblk *)((uint32)fits + fits->mlength);
 	}

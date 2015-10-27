@@ -634,6 +634,10 @@ extern syscall 	set_cpuqdata(struct envvar *, uint32);
 /* in file setprio.c */
 extern syscall setprio(pid32);
 
+/* in file mem2.c */
+extern syscall printfreemem();
+
+
 
 /* NETWORK BYTE ORDER CONVERSION NOT NEEDED ON A BIG-ENDIAN COMPUTER */
 #define	htons(x)   ( ( 0xff & ((x)>>8) ) | ( (0xff & (x)) << 8 ) )

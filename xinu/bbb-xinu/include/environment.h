@@ -4,7 +4,7 @@
 #define INCLUDE_ENVIRONMENT_H_
 
 /* current number of vars defined */
-#define ENV_VARS 5
+#define ENV_VARS 6
 
 /* max name and value (string alias) lengths */
 #define EV_MAX_NAME_LEN 30
@@ -21,10 +21,15 @@
 #define EV_CPUQDATA 2
 #define EV_DEBUG 3
 #define EV_DTIMER 4
+#define EV_MEMALLOC 5
 
 /* default values for vars that do not have another header to be defined in */
 #define DEBUG_DEFAULT 0
 #define DTIMER_DEFAULT 0
+
+#define MEMALLOC_FIRSTFIT 0
+#define MEMALLOC_BESTFIT  1
+#define MEMALLOC_DEFAULT  0
 
 /* macro to write to stdin via kprintf some debugging message if env var EV_DEBUG is set to true */
 #define LOG(...) if(envtab[EV_DEBUG].val) kprintf( __VA_ARGS__)

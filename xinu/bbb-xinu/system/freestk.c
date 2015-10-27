@@ -1,21 +1,22 @@
-/* freemem.c - freemem */
+/* freestk.c - freestk */
 
 #include <xinu.h>
 
 /*------------------------------------------------------------------------
- *  freemem  -  Free a memory block, returning the block to the free list
+ * freestk - Free the stack memory beginning at the provided pointer
  *------------------------------------------------------------------------
  */
-syscall	freemem(
-	  char		*blkaddr,	/* Pointer to memory block	*/
-	  uint32	nbytes		/* Size of block in bytes	*/
-	)
+syscall	freestk(struct memblk *stkaddr, uint32 nbytes)
 {
+
 	intmask	mask;			/* Saved interrupt mask		*/
-	struct	memblk	*next, *prev, *block;
+	struct	memblk	*next, *prev, *block, *blkaddr;
 	uint32	top;
 
 	mask = disable();
+
+	blkaddr = stkaddr - nbytes + sizeof(uint32);
+
 	if ((nbytes == 0) || ((uint32) blkaddr < (uint32) minheap)
 			  || ((uint32) blkaddr > (uint32) maxheap)) {
 		restore(mask);
@@ -25,11 +26,11 @@ syscall	freemem(
 	nbytes = (uint32) roundmb(nbytes);	/* Use memblk multiples	*/
 	block = (struct memblk *)blkaddr;
 
-	prev = &memlist;			/* Walk along free list	*/
-	next = memlist.mnext;
-	while ((next != &memlist) && (next < block)) {
-		prev = next;
-		next = next->mnext;
+	next = &memlist;			/* Walk along free list	*/
+	prev = memlist.mprev;
+	while ((prev != &memlist) && (prev > block)) {
+		next = prev;
+		prev = prev->mprev;
 	}
 
 	if (prev == &memlist) {		/* Compute top of previous block*/
@@ -71,4 +72,5 @@ syscall	freemem(
 	}
 	restore(mask);
 	return OK;
+
 }

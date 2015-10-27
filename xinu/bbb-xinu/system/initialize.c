@@ -40,7 +40,8 @@ struct envvar envtab[ENV_VARS] =
 				QTYPE_DEFAULT, (void *)set_scheduler },
 		{ 2, "cpuqdata\0", 2, (char *[]){"no\0", "yes\0"}, CPUQDATA_DEFAULT, (void *)set_cpuqdata },
 		{ 3, "debug\0", 2, (char *[]){"no\0", "yes\0"}, DEBUG_DEFAULT, NULL },
-		{ 4, "dtimer\0", 0, NULL, DTIMER_DEFAULT, NULL }
+		{ 4, "dtimer\0", 0, NULL, DTIMER_DEFAULT, NULL },
+		{ 5, "memalloc\0", 2, (char *[]){"first-fit\0","best-fit\0"}, MEMALLOC_DEFAULT, NULL }
 };
 
 /* temporary queue used to reorganize other queues */

@@ -87,3 +87,7 @@ extern 	shellcmd  xsh_factwait(int32, char *[]);
 
 /* in file xsh_set.c */
 extern 	shellcmd  xsh_set(int32, char *[]);
+
+/* in file xsh_freemem.c */
+extern	shellcmd  xsh_freemem(int32, char *[]);
+
