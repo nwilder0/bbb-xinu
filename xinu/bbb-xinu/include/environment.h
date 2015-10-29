@@ -4,7 +4,7 @@
 #define INCLUDE_ENVIRONMENT_H_
 
 /* current number of vars defined */
-#define ENV_VARS 6
+#define ENV_VARS 7
 
 /* max name and value (string alias) lengths */
 #define EV_MAX_NAME_LEN 30
@@ -22,14 +22,18 @@
 #define EV_DEBUG 3
 #define EV_DTIMER 4
 #define EV_MEMALLOC 5
+#define EV_CMDHIST 6
 
 /* default values for vars that do not have another header to be defined in */
-#define DEBUG_DEFAULT 0
+#define DEBUG_DEFAULT 1
 #define DTIMER_DEFAULT 0
 
 #define MEMALLOC_FIRSTFIT 0
 #define MEMALLOC_BESTFIT  1
 #define MEMALLOC_DEFAULT  0
+
+#define CMDHIST_DEFAULT	  5
+#define CMDHIST_MAX		  100
 
 /* macro to write to stdin via kprintf some debugging message if env var EV_DEBUG is set to true */
 #define LOG(...) if(envtab[EV_DEBUG].val) kprintf( __VA_ARGS__)
@@ -48,8 +52,15 @@ struct envvar {
 
 };
 
+struct strlist {
+	char *str;
+	struct strlist *prev;
+	struct strlist *next;
+};
+
 /* extern for the env vars table */
 extern struct envvar envtab[];
 
+extern struct strlist *cmdhistory;
 
 #endif /* INCLUDE_ENVIRONMENT_H_ */

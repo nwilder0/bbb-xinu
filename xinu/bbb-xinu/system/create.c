@@ -31,6 +31,7 @@ pid32	create(
 	if (ssize < MINSTK)
 		ssize = MINSTK;
 	ssize = (uint32) roundew(ssize);
+	LOG("\n create: about to getstk of size - %d",ssize);
 	if (((saddr = (uint32 *)getstk(ssize)) ==
 	    (uint32 *)SYSERR ) ||
 	    (pid=newpid()) == SYSERR || priority < 1 ) {
@@ -38,6 +39,7 @@ pid32	create(
 		return SYSERR;
 	}
 
+	LOG("\n create: stack allocated at addr: %x \n",saddr);
 	prcount++;
 	prptr = &proctab[pid];
 

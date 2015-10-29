@@ -45,7 +45,7 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 	/* Force context switch to highest priority ready process */
 	currpid = dequeue(readylist);
 
-	LOG("\nResched(): new curr ps is pid = %d\n",currpid);
+	/* LOG("\nResched(): new curr ps is pid = %d\n",currpid); */
 	readycount--;
 	ptnew = &proctab[currpid];
 

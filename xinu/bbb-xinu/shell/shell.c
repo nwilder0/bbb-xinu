@@ -39,6 +39,130 @@ const	struct	cmdent	cmdtab[] = {
 
 uint32	ncmd = sizeof(cmdtab) / sizeof(struct cmdent);
 
+struct strlist *cmdhistory = NULL;
+
+void cmdhistoryinit() {
+
+	uint32 histval = envtab[EV_CMDHIST].val;
+	int i;
+
+	LOG("\n cmdhistoryinit: starting \n");
+	if(histval > 0 && histval <= CMDHIST_MAX) {
+
+		LOG("\n cmdhistoryinit: alloc mem for %d cmds \n", histval);
+		cmdhistory = (struct strlist *)getmem(sizeof(struct strlist)*histval);
+		if(cmdhistory == -1) {
+			cmdhistory = NULL;
+		} else {
+			struct strlist *tmpcmdhist = cmdhistory;
+			LOG("\n cmdhistoryinit: *tmpcmdhist starts at addr: %x \n",tmpcmdhist);
+			struct strlist *next=NULL;
+			tmpcmdhist->next = NULL;
+			tmpcmdhist->prev = NULL;
+			tmpcmdhist->str = NULL;
+
+			LOG("\n cmdhistoryinit: setting initial vals, loop \n");
+			for(i = 1; i<histval; i++) {
+				LOG("\n cmdhistoryinit: for loop %d: set tmp->str (%x) to NULL \n", i, &(tmpcmdhist->str));
+				tmpcmdhist->str = NULL;
+				LOG("\n cmdhistoryinit: for loop %d: set tmp->next (%x) to next ptr (val: %x) \n",
+						 i, &(tmpcmdhist->next),next);
+				tmpcmdhist->next = next;
+				LOG("\n cmdhistoryinit: for loop %d: set tmp->prev (%x) to tmp+12 (val: %x) \n",
+						 i, &(tmpcmdhist->prev),tmpcmdhist + 1);
+				tmpcmdhist->prev = tmpcmdhist + 1;
+				LOG("\n cmdhistoryinit: for loop %d: set next to tmp (%x) \n", i, tmpcmdhist);
+				next = tmpcmdhist;
+				LOG("\n cmdhistoryinit: for loop %d: set tmp to tmp->prev (%x) (val: %x) \n",
+						 i, &(tmpcmdhist->prev),tmpcmdhist->prev);
+				tmpcmdhist = tmpcmdhist->prev;
+			}
+			LOG("\n cmdhistoryinit: for loop %d: set tmp->next (%x) to next ptr (val: %x) \n",
+					 i, &(tmpcmdhist->next),next);
+			tmpcmdhist->next = next;
+			LOG("\n cmdhistoryinit: for loop %d: set tmp->str (%x) to NULL \n", i, &(tmpcmdhist->str));
+			tmpcmdhist->str = NULL;
+			LOG("\n cmdhistoryinit: for loop %d: set tmp->prev (%x) to NULL \n", i, &(tmpcmdhist->prev));
+			tmpcmdhist->prev = NULL;
+		}
+	}
+	LOG("\n cmdhistoryinit: finished \n");
+}
+
+void cmdhistorydel() {
+
+	struct strlist *tmpcmdhist = cmdhistory;
+
+	if(cmdhistory!=NULL) {
+		LOG("\n cmdhistorydel: starting \n");
+		while(tmpcmdhist != NULL) {
+			if(tmpcmdhist->str != NULL) {
+				LOG("\n cmdhistorydel: freeing str \n");
+				freemem(tmpcmdhist->str,strlen(tmpcmdhist->str)+1);
+				tmpcmdhist->str = NULL;
+			}
+			tmpcmdhist = tmpcmdhist->prev;
+		}
+
+		LOG("\n cmdhistorydel: freeing cmd list \n");
+
+		freemem((char *)cmdhistory, sizeof(struct strlist)*(envtab[EV_CMDHIST].val));
+		cmdhistory = NULL;
+	}
+	LOG("\n cmdhistorydel: finished \n");
+}
+
+void cmdhistoryadd(char *buf, uint32 len) {
+
+	struct strlist *tmpcmd = cmdhistory;
+	int i = 0;
+
+	LOG("\n cmdhistoryadd: starting \n");
+
+	char *newcmd = getmem(len+1);
+	strncpy(newcmd,buf,len);
+	*(newcmd + len) = '\0';
+
+	char *prevstr = NULL;
+
+	LOG("\n cmdhistoryadd: set tmpcmd to cmdhistory (val: %x) \n",cmdhistory);
+	LOG("\n cmdhistoryadd: alloc newcmd (%x) to len: %d and copy in str: %s \n",newcmd,len+1,newcmd);
+
+	LOG("\n cmdhistoryadd: loop \n");
+
+	while(tmpcmd != NULL && newcmd != NULL) {
+		LOG("\n cmdhistoryadd: for loop %d: set prevstr to tmpcmd->str (%x) (val: %x) \n",
+				i, &(tmpcmd->str), tmpcmd->str);
+		LOG("\n \t tmp->str: str val = %s", tmpcmd->str);
+		prevstr = tmpcmd->str;
+		LOG("\n cmdhistoryadd: for loop %d: set tmp->str (%x) to newcmd (val: %x) \n",
+				i, &(tmpcmd->str), newcmd);
+		LOG("\n \t newcmd: str val = %s", newcmd);
+		tmpcmd->str = newcmd;
+		LOG("\n cmdhistoryadd: for loop %d: set newcmd to prevstr (val: %x) \n",
+				i, prevstr);
+		LOG("\n \t prevstr: str val = %s", prevstr);
+		newcmd = prevstr;
+		LOG("\n cmdhistoryadd: for loop %d: set tmpcmd to tmpcmd->prev (%x) (val: %x) \n",
+				i, &(tmpcmd->prev), tmpcmd->prev);
+		tmpcmd = tmpcmd->prev;
+		LOG("\n cmdhistoryadd: loop iteration %d complete",i++);
+	}
+
+	if(newcmd) {
+		LOG("\n cmdhistoryadd: about to free last used cmd \n");
+		LOG("\n cmdhistoryadd: str size is %d bytes", strlen(newcmd)+1);
+		LOG("\n cmdhistoryadd: str ptr address is %x", newcmd);
+		LOG("\n cmdhistoryadd: str val is %s", newcmd);
+		if(envtab[EV_DEBUG].val == EV_VALUE_YES) sleepms(500);
+		freemem(newcmd,strlen(newcmd)+1);
+	}
+	LOG("\n cmdhistoryadd: finished \n");
+}
+
+
+
+
 /************************************************************************/
 /* shell  -  Provide an interactive user interface that executes	*/
 /*	     commands.  Each command begins with a command name, has	*/
@@ -100,6 +224,8 @@ process	shell (
 
 	fprintf(dev, "%s\n\n", SHELL_STRTMSG);
 
+	cmdhistoryinit();
+
 	/* Continually prompt the user, read input, and execute command	*/
 
 	while (TRUE) {
@@ -110,6 +236,7 @@ process	shell (
 
 		/* Read a command */
 
+		LOG("\n Shell: about to read \n");
 		len = read(dev, buf, sizeof(buf));
 
 		srand(cputime());	/* ADDDDD */
@@ -126,9 +253,13 @@ process	shell (
 			continue;
 		}
 
+		LOG("\n Shell: adding cmd of len %d \n",len);
+		cmdhistoryadd(buf, len);
+
 		buf[len] = SH_NEWLINE;	/* terminate line */
 
 		/* Parse input line and divide into tokens */
+
 
 		ntok = lexan(buf, len, tokbuf, &tlen, tok, toktyp);
 
@@ -284,6 +415,7 @@ process	shell (
 		}
 
 		/* Spawn child thread for non-built-in commands */
+		LOG("\n Shell: creating child 4 cmd \n");
 
 		child = create(cmdtab[j].cfunc,
 			SHELL_CMDSTK, SHELL_CMDPRIO,
@@ -307,7 +439,7 @@ process	shell (
 		resume(child);
 		if (! backgnd) {
 			msg = receive();
-			while (msg != child) {
+			while (msg != child && msg != NULLPROC) {
 				msg = receive();
 			}
 		}
@@ -316,5 +448,11 @@ process	shell (
     /* Terminate the shell process by returning from the top level */
 
     fprintf(dev,SHELL_EXITMSG);
+
+	LOG("\n Shell: cmdhistory delete \n");
+
+    cmdhistorydel();
+
     return OK;
 }
+

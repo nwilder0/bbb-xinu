@@ -89,8 +89,6 @@ syscall set_cpuqdata(struct envvar *varptr, uint32 newval) {
 
 syscall set_memalloc(struct envvar *varptr, uint32 newval) {
 
-	uint32 i;
-
 	uint32 oldval = varptr->val;
 
 	if(oldval != newval) {
@@ -102,4 +100,19 @@ syscall set_memalloc(struct envvar *varptr, uint32 newval) {
 
 	return OK;
 
+}
+
+syscall set_cmdhistory(struct envvar *varptr, uint32 newval) {
+
+	uint32 oldval = varptr->val;
+
+	if(oldval != newval) {
+		cmdhistorydel();
+		if(newval) {
+			cmdhistoryinit();
+		}
+		varptr->val = newval;
+	}
+
+	return OK;
 }

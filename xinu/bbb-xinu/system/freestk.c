@@ -6,16 +6,16 @@
  * freestk - Free the stack memory beginning at the provided pointer
  *------------------------------------------------------------------------
  */
-syscall	freestk(struct memblk *stkaddr, uint32 nbytes)
+syscall	freestk(char *stkaddr, uint32 nbytes)
 {
 
 	intmask	mask;			/* Saved interrupt mask		*/
-	struct	memblk	*next, *prev, *block, *blkaddr;
+	struct	memblk	*next, *prev, *block, *blkaddr, *curr;
 	uint32	top;
 
 	mask = disable();
 
-	blkaddr = stkaddr - nbytes + sizeof(uint32);
+	blkaddr = ((struct memblk *)(stkaddr - nbytes + sizeof(uint32)));
 
 	if ((nbytes == 0) || ((uint32) blkaddr < (uint32) minheap)
 			  || ((uint32) blkaddr > (uint32) maxheap)) {
@@ -27,25 +27,25 @@ syscall	freestk(struct memblk *stkaddr, uint32 nbytes)
 	block = (struct memblk *)blkaddr;
 
 	next = &memlist;			/* Walk along free list	*/
-	prev = memlist.mprev;
-	while ((prev != &memlist) && (prev > block)) {
-		next = prev;
-		prev = prev->mprev;
+	curr = memlist.mprev;
+	while ((curr != &memlist) && (curr > block)) {
+		next = curr;
+		curr = curr->mprev;
 	}
 
-	if (prev == &memlist) {		/* Compute top of previous block*/
+	if (curr == &memlist) {		/* Compute top of previous block*/
 		top = (uint32) NULL;
 	} else {
-		top = (uint32) prev + prev->mlength;
+		top = (uint32) curr + curr->mlength;
 	}
 
 	/* Ensure new block does not overlap previous or next blocks	*/
 
-	if (((prev != &memlist) && (uint32) block < top)
-	    || ((next != NULL)	&& (uint32) block+nbytes>(uint32)next)) {
+	/* if (((prev != &memlist) && (uint32) block < top)
+	    || ((next != &memlist)	&& (uint32) block+nbytes>(uint32)next)) {
 		restore(mask);
 		return SYSERR;
-	}
+	} */
 
 	memlist.mlength += nbytes;
 
@@ -53,18 +53,18 @@ syscall	freestk(struct memblk *stkaddr, uint32 nbytes)
 
 	if (top == (uint32) block) { 	/* Coalesce with previous block	*/
 		prev->mlength += nbytes;
-		block = prev;
+		block = curr;
 	} else {			/* Link into list as new node	*/
 		block->mnext = next;
 		next->mprev = block;
 		block->mlength = nbytes;
-		block->mprev = prev;
-		prev->mnext = block;
+		block->mprev = curr;
+		curr->mnext = block;
 	}
 
 	/* Coalesce with next block if adjacent */
 
-	if (((uint32) block + block->mlength) == (uint32) next) {
+	if ((((uint32) block) + block->mlength) == (uint32) next) {
 		block->mlength += next->mlength;
 		block->mnext = next->mnext;
 		next = block->mnext;

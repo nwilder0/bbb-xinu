@@ -57,7 +57,7 @@ static void printFreeList(void)
 	printf("Block address  Length (dec)  Length (hex)\n");
 	printf("-------------  ------------  ------------\n");
 	
-	for (block = memlist.mnext; block != NULL; block = block->mnext) {
+	for (block = memlist.mnext; block != &memlist; block = block->mnext) {
 		printf("  0x%08x    %9d     0x%08x\n", block,
 			block->mlength, block->mlength);
 	}
@@ -95,7 +95,7 @@ static void printMemUse(void)
 
 	/* Calculate the amount of memory on the free list */
 
-	for (block = memlist.mnext; block != NULL; block = block->mnext) {
+	for (block = memlist.mnext; block != &memlist; block = block->mnext) {
 		kfree += block->mlength;
 	}
 

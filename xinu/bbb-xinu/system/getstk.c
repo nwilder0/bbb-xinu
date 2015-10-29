@@ -14,6 +14,8 @@ char  	*getstk(
 	struct	memblk	*prev, *curr, *next;	/* Walk through memory list	*/
 	struct	memblk	*fits, *fitsprev; /* Record block that fits	*/
 
+	LOG("\n getstk: starting, size = %d \n", nbytes);
+
 	mask = disable();
 	if (nbytes == 0) {
 		restore(mask);
@@ -22,20 +24,24 @@ char  	*getstk(
 
 	nbytes = (uint32) roundmb(nbytes);	/* Use mblock multiples	*/
 
+	LOG("\n getstk: rounded size is now: %d",nbytes);
+
 	prev = &memlist;
 	curr = memlist.mprev;
 	fits = NULL;
 	fitsprev = NULL;  /* Just to avoid a compiler warning */
 
+	LOG("\n getstk: about to enter loop: curr: %x, prev: %x",curr, prev);
 	while (curr != &memlist) {			/* Scan entire list	*/
-		if (curr->mlength >= nbytes) {	/* Record block address	*/
+		if (curr->mlength >= nbytes) {
 			if((envtab[EV_MEMALLOC].val == MEMALLOC_FIRSTFIT) || (fits == NULL) ||
 					(curr->mlength == nbytes) || (fits->mlength > curr->mlength)) {
 				fits = curr;		/*   when request fits	*/
 				fitsprev = prev;
 			}
 		}
-		next = curr;
+		LOG("\n getstk: next iteration: curr = curr->mprev (%x)",curr->mprev);
+		prev = curr;
 		curr = curr->mprev;
 	}
 
@@ -50,9 +56,11 @@ char  	*getstk(
 	} else {				/* Remove top section	*/
 
 		fits->mlength -= nbytes;
-		fits = (struct memblk *)((uint32)fits + fits->mlength);
+		fits = (struct memblk *)(((char *)fits) + fits->mlength);
 	}
 	memlist.mlength -= nbytes;
 	restore(mask);
-	return (char *)((uint32) fits + nbytes - sizeof(uint32));
+	LOG("\n getstk: returning stack block of %d bytes at addr %x", nbytes,
+			((uint32) ((char *)fits + nbytes - sizeof(uint32))));
+	return (char *)((uint32)( ((char *)fits) + nbytes - sizeof(uint32)));
 }

@@ -3,12 +3,22 @@
 #include <xinu.h>
 #include <stdio.h>
 int32 cpudelay;
+
+pid32 shellpid = NULL;
+
 volatile uint32	gcounter = 400000000;
 process	counterproc() {
 
 	while(gcounter > 0) {
 		gcounter--;
 	}
+	return OK;
+}
+
+syscall reshell()
+{
+	kprintf("\n\nattempting restore of shell..\n\n");
+	send(shellpid,(umsg32)NULLPROC);
 	return OK;
 }
 
@@ -39,7 +49,8 @@ process	main(void)
 
 	kprintf("\n...creating a shell\n");
 	recvclr();
-	resume(create(shell, 8192, 50, "shell", 1, CONSOLE));
+	shellpid = create(shell, 8192, 50, "shell", 1, CONSOLE);
+	resume(shellpid);
 
 	/* Wait for shell to exit and recreate it */
 
@@ -47,7 +58,8 @@ process	main(void)
 		receive();
 		sleepms(200);
 		kprintf("\n\nMain process recreating shell\n\n");
-		resume(create(shell, 4096, 20, "shell", 1, CONSOLE));
+		shellpid = create(shell, 4096, 20, "shell", 1, CONSOLE);
+		resume(shellpid);
 	}
 	return OK;
 }

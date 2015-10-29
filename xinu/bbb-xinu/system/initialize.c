@@ -41,7 +41,8 @@ struct envvar envtab[ENV_VARS] =
 		{ 2, "cpuqdata\0", 2, (char *[]){"no\0", "yes\0"}, CPUQDATA_DEFAULT, (void *)set_cpuqdata },
 		{ 3, "debug\0", 2, (char *[]){"no\0", "yes\0"}, DEBUG_DEFAULT, NULL },
 		{ 4, "dtimer\0", 0, NULL, DTIMER_DEFAULT, NULL },
-		{ 5, "memalloc\0", 2, (char *[]){"first-fit\0","best-fit\0"}, MEMALLOC_DEFAULT, NULL }
+		{ 5, "memalloc\0", 2, (char *[]){"first-fit\0","best-fit\0"}, MEMALLOC_DEFAULT, NULL },
+		{ 6, "cmdhistory\0", 0, NULL, CMDHIST_DEFAULT, (void *)set_cmdhistory }
 };
 
 /* temporary queue used to reorganize other queues */
@@ -76,12 +77,12 @@ void	nulluser()
 	
 	/* Output Xinu memory layout */
 	free_mem = 0;
-	for (memptr = memlist.mnext; memptr != NULL;
+	for (memptr = memlist.mnext; memptr != &memlist;
 						memptr = memptr->mnext) {
 		free_mem += memptr->mlength;
 	}
 	kprintf("%10d bytes of free memory.  Free list:\n", free_mem);
-	for (memptr=memlist.mnext; memptr!=NULL;memptr = memptr->mnext) {
+	for (memptr=memlist.mnext; memptr!=&memlist;memptr = memptr->mnext) {
 	    kprintf("           [0x%08X to 0x%08X]\r\n",
 		(uint32)memptr, ((uint32)memptr) + memptr->mlength - 1);
 	}

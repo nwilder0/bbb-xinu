@@ -20,6 +20,11 @@ void	ttyhandle_in (
 
 	ch = csrptr->buffer;
 
+	if(ch==TY_CTRLC) {
+		reshell();
+		return;
+	}
+
 	/* Compute chars available */
 
 	avail = semcount(typtr->tyisem);

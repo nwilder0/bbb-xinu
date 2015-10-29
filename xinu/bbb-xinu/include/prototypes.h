@@ -630,6 +630,7 @@ extern syscall 	setenv(uint32, uint32);
 /* in file sets.c */
 extern syscall 	set_scheduler(struct envvar *, uint32);
 extern syscall 	set_cpuqdata(struct envvar *, uint32);
+extern syscall	set_cmdhistory(struct envvar *, uint32);
 
 /* in file setprio.c */
 extern syscall setprio(pid32);
@@ -637,7 +638,16 @@ extern syscall setprio(pid32);
 /* in file mem2.c */
 extern syscall printfreemem();
 
+/* in file freestk.c */
+extern syscall freestk(char *, uint32);
 
+/* in file main.c */
+extern syscall reshell();
+
+/* in file shell.c */
+extern void cmdhistorydel();
+extern void cmdhistoryinit();
+extern void cmdhistoryadd();
 
 /* NETWORK BYTE ORDER CONVERSION NOT NEEDED ON A BIG-ENDIAN COMPUTER */
 #define	htons(x)   ( ( 0xff & ((x)>>8) ) | ( (0xff & (x)) << 8 ) )

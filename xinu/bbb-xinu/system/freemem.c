@@ -22,6 +22,7 @@ syscall	freemem(
 		return SYSERR;
 	}
 
+	LOG("\n freemem: starting free of %d byte block at addr %x \n", nbytes, blkaddr);
 	nbytes = (uint32) roundmb(nbytes);	/* Use memblk multiples	*/
 	block = (struct memblk *)blkaddr;
 
@@ -51,9 +52,11 @@ syscall	freemem(
 	/* Either coalesce with previous block or add to free list */
 
 	if (top == (uint32) block) { 	/* Coalesce with previous block	*/
+		LOG("\n freemem: coalescing with prev block \n");
 		prev->mlength += nbytes;
 		block = prev;
 	} else {			/* Link into list as new node	*/
+		LOG("\n freemem: linking into list as new node \n");
 		block->mnext = next;
 		next->mprev = block;
 		block->mlength = nbytes;
@@ -64,6 +67,7 @@ syscall	freemem(
 	/* Coalesce with next block if adjacent */
 
 	if (((uint32) block + block->mlength) == (uint32) next) {
+		LOG("\n freemem: coalescing with next block \n");
 		block->mlength += next->mlength;
 		block->mnext = next->mnext;
 		next = block->mnext;

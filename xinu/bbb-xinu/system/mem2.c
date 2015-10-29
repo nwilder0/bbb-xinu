@@ -5,19 +5,25 @@ syscall printfreemem() {
 	intmask	mask;			/* Saved interrupt mask		*/
 	mask = disable();
 
-	struct	memblk	*prev, *curr;
+	struct	memblk	*curr;
 
-	prev = &memlist;
+	int blkcount = 0;
+	int totalsz = 0;
+
 	curr = memlist.mnext;
-	if(curr == NULL) {
+	if(curr == &memlist) {
 		printf("\nThere is no free memory\n");
 	}
 
-	while (curr != NULL) {			/* Search free list	*/
+	while (curr != &memlist) {			/* Search free list	*/
 		printf("\nFree memory block: Address - %x, Size - %u", curr, curr->mlength);
-		prev = curr;
+		totalsz += curr->mlength;
+		blkcount++;
+
 		curr = curr->mnext;
 	}
+
+	printf("\n\nTotal blocks: %d,  Total size: %d bytes\n\n", blkcount, totalsz);
 
 	restore(mask);
 	return OK;
