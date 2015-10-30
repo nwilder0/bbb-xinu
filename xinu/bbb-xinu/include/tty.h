@@ -69,11 +69,11 @@ extern	struct	ttycblk	ttytab[];
 #define	TY_STRTCH	'\021'		/* Control-Q restarts output	*/
 #define	TY_KILLCH	'\025'		/* Control-U is line kill	*/
 #define	TY_UPARROW	'^'		/* Used for control chars (^X)	*/
-#define TY_CTRLC	'\003'	/* control-c */
-#define TY_ESC		'\027'
-#define TY_ARROW	'\133'
-#define TY_UP		'\101'
-#define TY_DOWN		'\102'
+#define TY_CTRLC	'\003'		/* control-c */
+#define TY_ESC		'\027'		/* esc character ('^[') for VT102 */
+#define TY_ARROW	'\133'		/* the tty arrow char as represented by '[' */
+#define TY_UP		'\101'		/* the up arrow trailing char, 'A' */
+#define TY_DOWN		'\102'		/* the down arrow trailing char, 'B' */
 #define	TY_FULLCH	TY_BELL		/* char to echo when buffer full*/
 
 /* Tty control function codes */

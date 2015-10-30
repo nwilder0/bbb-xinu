@@ -20,6 +20,8 @@ void	ttyhandle_in (
 
 	ch = csrptr->buffer;
 
+	/* if ctrl-c was pressed, then run reshell() to put the current shell-spawned process */
+	/* in the background and allow the shell to run */
 	if(ch==TY_CTRLC) {
 		reshell();
 		return;

@@ -2,10 +2,16 @@
 
 #include <xinu.h>
 
+/*------------------------------------------------------------------------
+ *  ttychkspecial  -  Tracks character input to detect arrow key presses,
+ *  Not currently working
+ *------------------------------------------------------------------------
+ */
 uint8 ttychkspecial(char *ch) {
 	LOG("\n ttychkspecial: Checking char: %c", *ch);
 	static uint8	chesc=0,arrow=0;
 
+	/* track the previous key presses to understand when the ^[[A or B sequence is encountered */
 	switch(*ch) {
 	case TY_ESC:
 		chesc = 1;
@@ -20,6 +26,7 @@ uint8 ttychkspecial(char *ch) {
 		break;
 
 	case TY_UP:
+		/* the idea here is to only show historical commands if the shell is active and waiting for input */
 		LOG("\n ttychkspecial: Found up arrow press \n");
 		LOG("\n ttychkspecial: shellpid = %d, shell prstate = %d \n", shellpid, proctab[shellpid].prstate);
 		LOG("\n ttychkspecial: arrow = %d, chesc = %d \n",arrow, chesc);
@@ -33,6 +40,7 @@ uint8 ttychkspecial(char *ch) {
 		break;
 
 	case TY_DOWN:
+		/* the idea here is to only show historical commands if the shell is active and waiting for input */
 		LOG("\n ttychkspecial: Found down arrow press \n");
 		if((arrow && chesc) && (shellpid && proctab[shellpid].prstate == PR_WAIT)) {
 			arrow = 0;
@@ -69,9 +77,9 @@ devcall	ttyread(
 	int32	firstch;		/* First input character on line*/
 	char	ch;			/* Next input character		*/
 	static struct strlist *tmpcmd = NULL;
-	uint8	chkarrow=0;
+	uint8	chkarrow=0;		/* the arrow key that was pressed, 0=none */
 
-	if(tmpcmd == NULL) { tmpcmd = cmdhistory;}
+	if(tmpcmd == NULL) { tmpcmd = cmdhistory;} /* initialize the cmd history entry to the last cmd if not already set */
 	if (count < 0) {
 		return SYSERR;
 	}
@@ -109,6 +117,7 @@ devcall	ttyread(
 
 	ch = (char) firstch;
 	*buff++ = ch;
+	/* track the character to detect arrow presses */
 	ttychkspecial(buff-1);
 
 	nread = 1;
@@ -117,15 +126,19 @@ devcall	ttyread(
 		ch = ttygetc(devptr);
 		*buff++ = ch;
 		nread++;
+		/* track the char to detect arrow key presses */
 		chkarrow = ttychkspecial(buff-1);
+		/* if an up/down arrow was pressed */
 		if(chkarrow != 0) {
-
+			/* if cmd history is enabled and there is a history */
 			if(tmpcmd != NULL && tmpcmd->str != NULL) {
+				/* erase any other characters on the command line */
 				LOG("\nttyread: Erasing %d characters\n",nread);
 				while(nread--) {
 					ttyputc(devptr,typtr->tyierasec);
 					buff--;
 				}
+				/* handle each type of arrow key press */
 				if(chkarrow == -1 && tmpcmd->next != NULL) {
 					LOG("\nttyread: Doing down arrow\n");
 					tmpcmd = tmpcmd->next;
@@ -140,6 +153,7 @@ devcall	ttyread(
 					tmpcmd = tmpcmd->prev;
 				}
 
+				/* echo back the historical cmd that was selected */
 				if(nread > 0) {
 					LOG("\nttyread: Echoing historical cmd of length: %d\n", nread);
 					ttywrite(devptr, buff, nread);

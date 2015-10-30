@@ -87,21 +87,11 @@ syscall set_cpuqdata(struct envvar *varptr, uint32 newval) {
 	return OK;
 }
 
-syscall set_memalloc(struct envvar *varptr, uint32 newval) {
-
-	uint32 oldval = varptr->val;
-
-	if(oldval != newval) {
-		//if(newval) {
-			// if going to bestfit then initialize memlist's mnextsz and add all the free blocks to the second list
-		//}
-		varptr->val = newval;
-	}
-
-	return OK;
-
-}
-
+/*------------------------------------------------------------------------
+ *  set_cmdhistory - sets the cmd history env var and resets the linked
+ *  list of cmds with the size appropriate for the new value of the var
+ *------------------------------------------------------------------------
+ */
 syscall set_cmdhistory(struct envvar *varptr, uint32 newval) {
 
 	uint32 oldval = varptr->val;

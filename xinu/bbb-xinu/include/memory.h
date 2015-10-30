@@ -1,7 +1,7 @@
 /* memory.h - roundmb, truncmb, freestk */
 
 #define	PAGE_SIZE		4096
-#define MIN_BLOCKSIZE	16
+#define MIN_BLOCKSIZE	16		/* use def for block size, 16 to allow for larger memblk struct */
 
 /*----------------------------------------------------------------------
  * roundmb, truncmb - Round or truncate address to memory block size
@@ -10,16 +10,12 @@
 #define	roundmb(x)	(char *)( ((MIN_BLOCKSIZE-1) + (uint32)(x)) & (~(MIN_BLOCKSIZE-1)) )
 #define	truncmb(x)	(char *)( ((uint32)(x)) & (~(MIN_BLOCKSIZE-1)) )
 
-/*----------------------------------------------------------------------
- *  freestk  --  Free stack memory allocated by getstk
- *----------------------------------------------------------------------
- */
-
+/* expand memblk to allow for backward traversal */
 struct	memblk	{			/* See roundmb & truncmb	*/
 	struct	memblk	*mnext;		/* Ptr to next free memory blk	*/
 	uint32	mlength;		/* Size of blk (includes memblk)*/
-	struct 	memblk  *mprev;
-	struct  memblk	*mnextsz;
+	struct 	memblk  *mprev;		/* ptr to previous free memory block */
+	struct  memblk	*mnextsz;	/* ptr to next larger or equal sized memory block (not currently used) */
 	};
 
 extern	struct	memblk	memlist;	/* Head of free memory list	*/

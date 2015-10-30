@@ -33,14 +33,18 @@ const	struct	cmdent	cmdtab[] = {
 	{"repeat", FALSE, xsh_repeat},
 	{"cpu_use", FALSE, xsh_cpu_use},
 	{"factwait", FALSE, xsh_factwait},
-	{"set",FALSE, xsh_set},
-	{"freemem",FALSE,xsh_freemem}
+	{"set",FALSE, xsh_set}
 };
 
 uint32	ncmd = sizeof(cmdtab) / sizeof(struct cmdent);
 
 struct strlist *cmdhistory = NULL;
 
+/*------------------------------------------------------------------------
+ *  cmdhistoryinit  -  initializes the list that will store previously
+ *  issued commands
+ *------------------------------------------------------------------------
+ */
 void cmdhistoryinit() {
 
 	uint32 histval = envtab[EV_CMDHIST].val;
@@ -89,6 +93,10 @@ void cmdhistoryinit() {
 	LOG("\n cmdhistoryinit: finished \n");
 }
 
+/*------------------------------------------------------------------------
+ *  cmdhistorydel  -  free the list that hold the shell command history
+ *------------------------------------------------------------------------
+ */
 void cmdhistorydel() {
 
 	struct strlist *tmpcmdhist = cmdhistory;
@@ -112,6 +120,10 @@ void cmdhistorydel() {
 	LOG("\n cmdhistorydel: finished \n");
 }
 
+/*------------------------------------------------------------------------
+ *  cmdhistoryadd  -  add a cmd to the history
+ *------------------------------------------------------------------------
+ */
 void cmdhistoryadd(char *buf, uint32 len) {
 
 	struct strlist *tmpcmd = cmdhistory;
@@ -130,6 +142,7 @@ void cmdhistoryadd(char *buf, uint32 len) {
 
 	LOG("\n cmdhistoryadd: loop \n");
 
+	/* loop through the history list, bumping each cmd string to a previous slot */
 	while(tmpcmd != NULL && newcmd != NULL) {
 		LOG("\n cmdhistoryadd: for loop %d: set prevstr to tmpcmd->str (%x) (val: %x) \n",
 				i, &(tmpcmd->str), tmpcmd->str);
@@ -149,6 +162,7 @@ void cmdhistoryadd(char *buf, uint32 len) {
 		LOG("\n cmdhistoryadd: loop iteration %d complete",i++);
 	}
 
+	/* if one cmd string fell off the back of the list, then free it */
 	if(newcmd) {
 		LOG("\n cmdhistoryadd: about to free last used cmd \n");
 		LOG("\n cmdhistoryadd: str size is %d bytes", strlen(newcmd)+1);

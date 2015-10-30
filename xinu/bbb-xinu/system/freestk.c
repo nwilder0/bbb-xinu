@@ -32,7 +32,7 @@ syscall	freestk(char *stkaddr, uint32 nbytes)
 	block = blkaddr;
 
 	LOG("\n freestk: memlist %x, mprev %x \n", &memlist, memlist.mprev);
-	next = &memlist;			/* Walk along free list	*/
+	next = &memlist;			/* Walk along free list	from the back*/
 	curr = memlist.mprev;
 	while ((curr != &memlist) && (curr > block)) {
 		next = curr;

@@ -4,6 +4,7 @@
 #include <stdio.h>
 int32 cpudelay;
 
+/* track the shell's PID so we can bring it to the foreground when a shell spawned process is stuck */
 pid32 shellpid = NULL;
 
 volatile uint32	gcounter = 400000000;
@@ -15,6 +16,14 @@ process	counterproc() {
 	return OK;
 }
 
+/*------------------------------------------------------------------------
+ *  reshell  -  wakes up the shell by sending it a message, this should
+ *  allow other commands to be run if a shell spawned process is hung or
+ *  otherwise not permiting a return to the shell (obviously this won't
+ *  work if the problem code (looping, etc) occurs while interrupts are
+ *  disabled
+ *------------------------------------------------------------------------
+ */
 syscall reshell()
 {
 	kprintf("\n\nattempting restore of shell..\n\n");

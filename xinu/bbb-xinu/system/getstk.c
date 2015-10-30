@@ -32,10 +32,11 @@ char  	*getstk(
 	fitsprev = NULL;  /* Just to avoid a compiler warning */
 
 	LOG("\n getstk: about to enter loop: curr: %x, prev: %x",curr, prev);
-	while (curr != &memlist) {			/* Scan entire list	*/
+	while (curr != &memlist) {			/* Scan entire list	starting from the back*/
 		LOG("\n loop: curr->mlen %d", curr->mlength);
 		if (curr->mlength >= nbytes) {
 
+			/* some debugging code */
 			if(envtab[EV_MEMALLOC].val == MEMALLOC_FIRSTFIT) { LOG("\n getstk: cond1 \n"); }
 			if(fits==NULL) { LOG("\n getstk: cond2 \n"); }
 			if(curr->mlength == nbytes) { LOG("\n getstk: cond3 \n"); }

@@ -20,6 +20,7 @@ void	meminit(void)
 
 	/* Initialize the memory list as one big block */
 
+	/* adjust the next few lines to handle double linked memlist */
 	memlist.mnext = (struct memblk *)minheap;
 	memlist.mprev = (struct memblk *)minheap;
 	memptr = memlist.mnext;

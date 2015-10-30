@@ -21,8 +21,8 @@
 #define EV_CPUQDATA 2
 #define EV_DEBUG 3
 #define EV_DTIMER 4
-#define EV_MEMALLOC 5
-#define EV_CMDHIST 6
+#define EV_MEMALLOC 5		/* controls the memory allocation algorithm, first fit or best fit */
+#define EV_CMDHIST 6		/* controls the storing of shell command history */
 
 /* default values for vars that do not have another header to be defined in */
 #define DEBUG_DEFAULT 0
@@ -32,8 +32,8 @@
 #define MEMALLOC_BESTFIT  1
 #define MEMALLOC_DEFAULT  1
 
-#define CMDHIST_DEFAULT	  5
-#define CMDHIST_MAX		  100
+#define CMDHIST_DEFAULT	  5			/* default number of past commands to save */
+#define CMDHIST_MAX		  100		/* max number of past commands that can be saved */
 
 /* macro to write to stdin via kprintf some debugging message if env var EV_DEBUG is set to true */
 #define LOG(...) if(envtab[EV_DEBUG].val) kprintf( __VA_ARGS__)
@@ -52,6 +52,7 @@ struct envvar {
 
 };
 
+/* linked list of strings; used to store history of shell commands */
 struct strlist {
 	char *str;
 	struct strlist *prev;

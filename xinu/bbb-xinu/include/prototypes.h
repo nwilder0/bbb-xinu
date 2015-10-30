@@ -635,9 +635,6 @@ extern syscall	set_cmdhistory(struct envvar *, uint32);
 /* in file setprio.c */
 extern syscall setprio(pid32);
 
-/* in file mem2.c */
-extern syscall printfreemem();
-
 /* in file freestk.c */
 extern syscall freestk(char *, uint32);
 
