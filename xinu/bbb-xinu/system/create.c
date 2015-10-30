@@ -35,6 +35,7 @@ pid32	create(
 	if (((saddr = (uint32 *)getstk(ssize)) ==
 	    (uint32 *)SYSERR ) ||
 	    (pid=newpid()) == SYSERR || priority < 1 ) {
+		LOG("\n create: syserr 1 \n");
 		restore(mask);
 		return SYSERR;
 	}

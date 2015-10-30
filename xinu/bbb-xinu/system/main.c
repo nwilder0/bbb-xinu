@@ -30,8 +30,8 @@ process	main(void)
 
 	uint32	*macaddr = 0x44e10630;
 	kprintf("mac addr: %x %x\n", *macaddr, *(macaddr+1));
-	int32 i;
-/*	for(i = 0; i < 6; i++) {
+/*	int32 i;
+	for(i = 0; i < 6; i++) {
 		NetData.ethucast[i] = i;
 		NetData.ethbcast[i] = 0xff;
 	}*/

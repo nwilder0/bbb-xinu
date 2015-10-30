@@ -57,6 +57,8 @@ static void printFreeList(void)
 	printf("Block address  Length (dec)  Length (hex)\n");
 	printf("-------------  ------------  ------------\n");
 	
+	LOG("\n printFreeList: memlist (%x), mnext (%x) (val: %x) \n",
+			&memlist, &(memlist.mnext), memlist.mnext);
 	for (block = memlist.mnext; block != &memlist; block = block->mnext) {
 		printf("  0x%08x    %9d     0x%08x\n", block,
 			block->mlength, block->mlength);

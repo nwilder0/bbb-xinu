@@ -11,7 +11,7 @@ char  	*getstk(
 	)
 {
 	intmask	mask;			/* Saved interrupt mask		*/
-	struct	memblk	*prev, *curr, *next;	/* Walk through memory list	*/
+	struct	memblk	*prev, *curr;	/* Walk through memory list	*/
 	struct	memblk	*fits, *fitsprev; /* Record block that fits	*/
 
 	LOG("\n getstk: starting, size = %d \n", nbytes);
@@ -33,9 +33,17 @@ char  	*getstk(
 
 	LOG("\n getstk: about to enter loop: curr: %x, prev: %x",curr, prev);
 	while (curr != &memlist) {			/* Scan entire list	*/
+		LOG("\n loop: curr->mlen %d", curr->mlength);
 		if (curr->mlength >= nbytes) {
+
+			if(envtab[EV_MEMALLOC].val == MEMALLOC_FIRSTFIT) { LOG("\n getstk: cond1 \n"); }
+			if(fits==NULL) { LOG("\n getstk: cond2 \n"); }
+			if(curr->mlength == nbytes) { LOG("\n getstk: cond3 \n"); }
+			if(fits && (fits->mlength > curr->mlength)) { LOG("\n getstk: cond4 \n"); }
+
 			if((envtab[EV_MEMALLOC].val == MEMALLOC_FIRSTFIT) || (fits == NULL) ||
 					(curr->mlength == nbytes) || (fits->mlength > curr->mlength)) {
+				LOG("\n getstk: fits set to curr %x \n",curr);
 				fits = curr;		/*   when request fits	*/
 				fitsprev = prev;
 			}
@@ -46,15 +54,17 @@ char  	*getstk(
 	}
 
 	if (fits == NULL) {			/* No block was found	*/
+		LOG("\n getstk: fits is null");
 		restore(mask);
 		return (char *)SYSERR;
 	}
 	if (nbytes == fits->mlength) {		/* Block is exact match	*/
-		fitsprev->mnext = fits->mnext;
-		next = fits->mnext;
-		next->mprev = fitsprev;
+		LOG("\n getstk: block is exact match \n");
+		fitsprev->mprev = fits->mprev;
+		prev = fits->mprev;
+		prev->mnext = fitsprev;
 	} else {				/* Remove top section	*/
-
+		LOG("\n getstk: remove top section \n");
 		fits->mlength -= nbytes;
 		fits = (struct memblk *)(((char *)fits) + fits->mlength);
 	}

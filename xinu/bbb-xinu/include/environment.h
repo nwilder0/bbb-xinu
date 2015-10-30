@@ -25,12 +25,12 @@
 #define EV_CMDHIST 6
 
 /* default values for vars that do not have another header to be defined in */
-#define DEBUG_DEFAULT 1
+#define DEBUG_DEFAULT 0
 #define DTIMER_DEFAULT 0
 
 #define MEMALLOC_FIRSTFIT 0
 #define MEMALLOC_BESTFIT  1
-#define MEMALLOC_DEFAULT  0
+#define MEMALLOC_DEFAULT  1
 
 #define CMDHIST_DEFAULT	  5
 #define CMDHIST_MAX		  100
