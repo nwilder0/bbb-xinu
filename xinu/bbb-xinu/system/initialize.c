@@ -19,7 +19,9 @@ extern	void meminit(void);	/* Initializes the free memory list	*/
 
 struct	procent	proctab[NPROC];	/* Process table			*/
 struct	sentry	semtab[NSEM];	/* Semaphore table			*/
+struct  rwbentry rwbtab[RWB_COUNT]; /* Read-Write Blocker table */
 struct	memblk	memlist;	/* List of free memory blocks		*/
+signed char rwbflags[NPROC];
 
 /* Active system status */
 
@@ -129,7 +131,8 @@ static	void	sysinit()
 {
 	int32	i,j;
 	struct	procent	*prptr;		/* Ptr to process table entry	*/
-	struct	sentry	*semptr;	/* Prr to semaphore table entry	*/
+	struct	sentry	*semptr;	/* Ptr to semaphore table entry	*/
+	struct  rwbentry *rwbptr;   /* Ptr to read-write blocker table entry */
 
 	/* Platform Specific Initialization */
 
@@ -213,6 +216,17 @@ static	void	sysinit()
 		semptr->sstate = S_FREE;
 		semptr->scount = 0;
 		semptr->squeue = newqueue();
+	}
+
+	for(i=0; i<RWB_COUNT; i++) {
+		rwbptr = &rwbtab[i];
+		rwbptr->rwcount = 0;
+		rwbptr->nextw = 0;
+		rwbptr->rwqueue = newqueue();
+		rwbptr->rwstate = S_FREE;
+	}
+	for(i=0; i<NPROC; i++) {
+		rwbflags[i] = 0;
 	}
 
 	/* Initialize buffer pools */

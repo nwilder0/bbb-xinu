@@ -24,6 +24,7 @@ typedef	uint32	intmask;	/* saved interrupt mask			*/
 typedef	int32	ibid32;		/* index block ID (used in file system)	*/
 typedef	int32	dbid32;		/* data block ID (used in file system)	*/
 typedef	int32	uid32;		/* ID for UDP table descriptor		*/
+typedef int32   rwb32;		/* read-write blocker ID */
 
 /* Function declaration return types */
 
