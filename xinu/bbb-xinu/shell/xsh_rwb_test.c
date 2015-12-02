@@ -16,8 +16,6 @@ rwb32 rwbtestid[2];
 
 shellcmd xsh_rwb_test(int nargs, char *args[])
 {
-	uint32 max_read_time = 8000;		// in ms, so 10 secs
-	uint32 write_time    = 5000;		// writers take 5 secs
 	int i;
 
 	for(i=0; i<10; i++) {

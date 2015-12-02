@@ -55,6 +55,7 @@ pid32	create(
 			prptr->statetimes[i][j] = ztime;
 		}
 	}
+	LOG2(DEBUG_INFO,DEBUG_MEMALLOC,"\nCreate: statetime initialization complete");
 
 	prptr->prprio0 = priority;
 	prptr->prprio = priority;
@@ -78,6 +79,8 @@ pid32	create(
 	*saddr = STACKMAGIC;
 	savsp = (uint32)saddr;
 
+	LOG2(DEBUG_INFO,DEBUG_MEMALLOC,"\nCreate: process vars set, now pushing args\n");
+
 	/* push arguments */
 	a = (uint32 *)(&nargs + 1);	/* start of args		*/
 	a += nargs -1;			/* last argument		*/
@@ -96,6 +99,7 @@ pid32	create(
 	*--saddr = (long)0x00000053;	/* CPSR, A, F bits set,		*/
 					/* Supervisor mode		*/
 	prptr->prstkptr = (char *)saddr;
+	LOG2(DEBUG_INFO,DEBUG_MEMALLOC,"\nCreate: operation finished, now restore mask and returning\n");
 	restore(mask);
 	return pid;
 

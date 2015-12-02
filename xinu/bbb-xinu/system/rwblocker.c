@@ -132,7 +132,7 @@ syscall rwb_trywrite(rwb32 rwb)
 	struct	rwbentry *rwbptr;		/* Ptr to sempahore table entry	*/
 
 	mask = disable();
-	print_rwb_debug()
+	print_rwb_debug();
 
 	if (isbadrwb(rwb)) {
 		restore(mask);
@@ -173,7 +173,7 @@ syscall rwb_tryread(rwb32 rwb)
 	struct	rwbentry *rwbptr;		/* Ptr to sempahore table entry	*/
 
 	mask = disable();
-	print_rwb_debug()
+	print_rwb_debug();
 
 	if (isbadrwb(rwb)) {
 		restore(mask);
@@ -219,7 +219,7 @@ syscall _signalrwb(pid32 thisid, rwb32 rwb) {
 	pid32 nextpid = -1;
 
 	mask = disable();
-	print_rwb_debug()
+	print_rwb_debug();
 
 	if (isbadrwb(rwb)) {
 		restore(mask);

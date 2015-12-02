@@ -117,7 +117,7 @@ syscall set_dblevel(struct envvar *varptr, uint32 newval) {
 	if(oldval != newval) {
 		for(i=1; i<=newval; i++)
 		{
-			lvlmask = lvlmask + DEBUG_L1 * (0x0001<<i)
+			lvlmask = lvlmask + DEBUG_L1 * (0x0001<<i);
 		}
 
 		debug_mask = (debug_mask & ~(DEBUG_VERBOSE)) | lvlmask;
@@ -130,7 +130,6 @@ syscall set_dblevel(struct envvar *varptr, uint32 newval) {
 
 syscall set_dbgroup(struct envvar *varptr, uint32 newval) {
 
-	uint32 i;
 	uint16 grpmask = (uint16)newval;
 
 	uint32 oldval = varptr->val;

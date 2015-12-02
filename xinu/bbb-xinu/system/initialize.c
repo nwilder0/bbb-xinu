@@ -21,7 +21,7 @@ struct	procent	proctab[NPROC];	/* Process table			*/
 struct	sentry	semtab[NSEM];	/* Semaphore table			*/
 struct  rwbentry rwbtab[RWB_COUNT]; /* Read-Write Blocker table */
 struct	memblk	memlist;	/* List of free memory blocks		*/
-signed char rwbflags[NPROC];
+int16 rwbflags[NPROC];
 
 /* Active system status */
 
@@ -45,8 +45,10 @@ struct envvar envtab[ENV_VARS] =
 		{ 4, "dtimer\0", 0, NULL, DTIMER_DEFAULT, NULL },
 		{ 5, "memalloc\0", 2, (char *[]){"first-fit\0","best-fit\0"}, MEMALLOC_DEFAULT, NULL },
 		{ 6, "cmdhistory\0", 0, NULL, CMDHIST_DEFAULT, (void *)set_cmdhistory },
-		{ 7, "dbgroup\0", DBGROUP_STRNUM, (char *[]){"none\0","scheduler\0","memalloc\0","shell\0","rwblocker\0","all\0"}, DBGROUP_DEFAULT, (void *)set_dbmask },
-		{ 8, "dblevel\0", DBLEVEL_STRNUM, (char *[]){"none\0","error\0","warning\0","info\0","verbose\0"}, DBLEVEL_DEFAULT, (void *)set_dblevel }
+		{ 7, "dbgroup\0", DBGROUP_STRNUM, (char *[]){"none\0","scheduler\0","memalloc\0","shell\0",
+				"rwblocker\0","all\0"}, DBGROUP_DEFAULT, (void *)set_dbgroup },
+		{ 8, "dblevel\0", DBLEVEL_STRNUM, (char *[]){"none\0","error\0","warning\0","info\0",
+				"verbose\0"}, DBLEVEL_DEFAULT, (void *)set_dblevel }
 };
 
 uint16 debug_mask;
@@ -227,7 +229,6 @@ static	void	sysinit()
 	for(i=0; i<RWB_COUNT; i++) {
 		rwbptr = &rwbtab[i];
 		rwbptr->rwcount = 0;
-		rwbptr->nextw = 0;
 		rwbptr->rwqueue = newqueue();
 		rwbptr->rwstate = S_FREE;
 		rwbptr->qcount = 0;

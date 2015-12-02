@@ -4,7 +4,7 @@
 #define INCLUDE_ENVIRONMENT_H_
 
 /* current number of vars defined */
-#define ENV_VARS 8
+#define ENV_VARS 9
 
 /* max name and value (string alias) lengths */
 #define EV_MAX_NAME_LEN 30
@@ -27,10 +27,10 @@
 #define EV_DBLEVEL 8
 
 /* default values for vars that do not have another header to be defined in */
-#define DEBUG_DEFAULT 0
+#define DEBUG_DEFAULT 1
 #define DTIMER_DEFAULT 0
 
-#define DBGROUP_DEFAULT 0x0000
+#define DBGROUP_DEFAULT 0x0FFF
 #define DBLEVEL_DEFAULT 0x7000
 
 #define DBGROUP_STRNUM			6
@@ -59,14 +59,14 @@ extern uint16 debug_mask;
 
 #define MEMALLOC_FIRSTFIT 0
 #define MEMALLOC_BESTFIT  1
-#define MEMALLOC_DEFAULT  1
+#define MEMALLOC_DEFAULT  0
 
 #define CMDHIST_DEFAULT	  5			/* default number of past commands to save */
 #define CMDHIST_MAX		  100		/* max number of past commands that can be saved */
 
 /* macro to write to stdin via kprintf some debugging message if env var EV_DEBUG is set to true */
 #define LOG(...) if(envtab[EV_DEBUG].val) kprintf( __VA_ARGS__)
-#define LOG2(lvl,grp,...) if(isset_dbmask(lvl+grp)) kprintf( __VA_ARGS__)
+#define LOG2(lvl,grp,...) if(isset_dbmask((lvl+grp))) kprintf( __VA_ARGS__)
 
 /* struct that defines the table entries in the env vars table */
 struct envvar {

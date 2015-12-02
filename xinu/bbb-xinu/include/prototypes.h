@@ -631,6 +631,8 @@ extern syscall 	setenv(uint32, uint32);
 extern syscall 	set_scheduler(struct envvar *, uint32);
 extern syscall 	set_cpuqdata(struct envvar *, uint32);
 extern syscall	set_cmdhistory(struct envvar *, uint32);
+extern syscall  set_dblevel(struct envvar *, uint32);
+extern syscall  set_dbgroup(struct envvar *, uint32);
 
 /* in file setprio.c */
 extern syscall setprio(pid32);

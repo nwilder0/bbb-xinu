@@ -22,6 +22,9 @@ void	clkhandler()
 		return;
 	}
 
+	LOG2(DEBUG_INFO,DEBUG_SCHEDULER,
+			"\nClkInt: a clock tick is being handled, ms was %d, secs were %d\n", 1000-count1000,clktime);
+
 	/* Acknowledge the interrupt */
 
 	csrptr->tisr = AM335X_TIMER1MS_TISR_OVF_IT_FLAG;

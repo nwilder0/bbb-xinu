@@ -16,7 +16,7 @@ struct rwbentry {
 };
 
 extern struct rwbentry rwbtab[];
-extern signed char rwbflags[];
+extern int16 rwbflags[];
 
 #define	isbadrwb(s)	((int32)(s) < 0 || (s) >= RWB_COUNT)
 
