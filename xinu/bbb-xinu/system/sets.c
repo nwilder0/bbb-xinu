@@ -106,3 +106,48 @@ syscall set_cmdhistory(struct envvar *varptr, uint32 newval) {
 
 	return OK;
 }
+
+syscall set_dblevel(struct envvar *varptr, uint32 newval) {
+
+	uint32 i;
+	uint16 lvlmask = 0;
+
+	uint32 oldval = varptr->val;
+
+	if(oldval != newval) {
+		for(i=1; i<=newval; i++)
+		{
+			lvlmask = lvlmask + DEBUG_L1 * (0x0001<<i)
+		}
+
+		debug_mask = (debug_mask & ~(DEBUG_VERBOSE)) | lvlmask;
+
+		varptr->val = newval;
+	}
+
+	return OK;
+}
+
+syscall set_dbgroup(struct envvar *varptr, uint32 newval) {
+
+	uint32 i;
+	uint16 grpmask = (uint16)newval;
+
+	uint32 oldval = varptr->val;
+
+	if(oldval != newval) {
+		if(newval>2) {
+			if(newval>=(DBGROUP_STRNUM-1)) {
+				grpmask = DEBUG_ALL;
+			} else {
+				grpmask = 1 << (newval-1);
+			}
+		}
+
+		debug_mask = (debug_mask & ~(DEBUG_ALL)) | grpmask;
+
+		varptr->val = newval;
+	}
+
+	return OK;
+}

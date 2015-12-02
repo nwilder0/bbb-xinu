@@ -13,6 +13,7 @@ syscall	kill(
 	intmask	mask;			/* Saved interrupt mask		*/
 	struct	procent *prptr;		/* Ptr to process' table entry	*/
 	int32	i,j;			/* Index into descriptors	*/
+	rwb32   rwbid;
 
 	mask = disable();
 	if (isbadpid(pid) || (pid == NULLPROC)
@@ -61,11 +62,18 @@ syscall	kill(
 		break;
 
 	case PR_WAIT:
-		semtab[prptr->prsem].scount++;
+		if(prptr->prsem < -1) {
+			rwbid = -1 * (prptr->prsem + 2);
+			rwbflags[pid] = 0;
+			rwbtab[rwbid].qcount--;
+		} else {
+			semtab[prptr->prsem].scount++;
+		}
 		/* Fall through */
 
 	case PR_READY:
 		getitem(pid);		/* Remove from queue */
+		if(rwbflags[pid] != 0  && prptr->prsem < -1) _signalrwb(pid, -1*(prptr->prsem+2));
 		/* Fall through */
 
 	default:

@@ -646,6 +646,17 @@ extern void cmdhistorydel();
 extern void cmdhistoryinit();
 extern void cmdhistoryadd();
 
+/* in file rwblocker.c */
+extern rwb32 rwbcreate(int32);
+extern syscall rwbdelete(rwb32);
+extern syscall rwbreset(rwb32,int32);
+extern syscall rwb_trywrite(rwb32);
+extern syscall rwb_tryread(rwb32);
+extern syscall signalrwb(rwb32);
+extern syscall _signalrwb(pid32, rwb32);
+extern syscall print_rwb_debug();
+
+
 /* NETWORK BYTE ORDER CONVERSION NOT NEEDED ON A BIG-ENDIAN COMPUTER */
 #define	htons(x)   ( ( 0xff & ((x)>>8) ) | ( (0xff & (x)) << 8 ) )
 #define	htonl(x)   (  (((x)>>24) & 0x000000ff) | (((x)>> 8) & 0x0000ff00) | \

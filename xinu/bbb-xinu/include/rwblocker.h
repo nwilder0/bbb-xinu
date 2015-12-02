@@ -6,23 +6,12 @@
 
 struct rwbentry {
 
-	uint32 ptr_data;
-
 	byte  rwstate;		/* Whether entry is S_FREE or S_USED	*/
-	sid32 semrwb;
 
 	int32 rwcount;
-	int32 nextw;
 
 	qid16 rwqueue;
-
-};
-
-struct rwbqentry {
-
-	pid32 pid;
-
-	uint8 is_writer;
+	int32 qcount;
 
 };
 
