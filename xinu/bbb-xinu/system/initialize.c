@@ -21,7 +21,7 @@ struct	procent	proctab[NPROC];	/* Process table			*/
 struct	sentry	semtab[NSEM];	/* Semaphore table			*/
 struct  rwbentry rwbtab[RWB_COUNT]; /* Read-Write Blocker table */
 struct	memblk	memlist;	/* List of free memory blocks		*/
-int16 rwbflags[NPROC];
+int32 rwbflags[NPROC];
 
 /* Active system status */
 

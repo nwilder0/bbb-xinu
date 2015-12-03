@@ -78,8 +78,10 @@ syscall	rwbdelete(
 	resched_cntl(DEFER_START);
 	while (rwbptr->qcount-- > 0) {	/* Free all waiting processes	*/
 		pid = getfirst(rwbptr->rwqueue);
-		rwbflags[pid] = 0;
-		ready(pid);
+		if (!isbadpid(pid)) {
+			rwbflags[pid] = 0;
+			ready(pid);
+		}
 	}
 
 	rwbptr->rwcount = 0;
@@ -115,8 +117,10 @@ syscall	rwbreset(
 	resched_cntl(DEFER_START);
 	while ((pid=getfirst(rwbqueue)) != EMPTY)
 		rwbptr->qcount--;
-		rwbflags[pid] = 0;
-		ready(pid);
+		if (!isbadpid(pid)) {
+			rwbflags[pid] = 0;
+			ready(pid);
+		}
 	rwbptr->rwcount = count;		/* Reset count as specified */
 	resched_cntl(DEFER_STOP);
 	restore(mask);
@@ -225,6 +229,10 @@ syscall _signalrwb(pid32 thisid, rwb32 rwb) {
 		restore(mask);
 		return SYSERR;
 	}
+	if (isbadpid(thisid)) {
+		restore(mask);
+		return SYSERR;
+	}
 	is_writer = rwbflags[thisid];
 	rwbflags[thisid] = 0;
 
@@ -245,18 +253,24 @@ syscall _signalrwb(pid32 thisid, rwb32 rwb) {
 		next_is_writer = 0;
 	} else {
 		nextpid = firstkey(rwbptr->rwqueue);
-		next_is_writer = rwbflags[nextpid];
-		if(next_is_writer == -1) {
-			if(rwbptr->rwqueue == 0) {
-				rwbptr->qcount--;
-				ready(dequeue(rwbptr->rwqueue));
-			}
-		} else {
-			while(next_is_writer == 1) {
-				rwbptr->qcount--;
-				ready(dequeue(rwbptr->rwqueue));
-				nextpid = firstkey(rwbptr->rwqueue);
-				next_is_writer = rwbflags[nextpid];
+		if (!isbadpid(nextpid)) {
+			next_is_writer = rwbflags[nextpid];
+			if(next_is_writer == -1) {
+				if(rwbptr->rwqueue == 0) {
+					rwbptr->qcount--;
+					ready(dequeue(rwbptr->rwqueue));
+				}
+			} else {
+				while(next_is_writer == 1) {
+					rwbptr->qcount--;
+					ready(dequeue(rwbptr->rwqueue));
+					nextpid = firstkey(rwbptr->rwqueue);
+					if (!isbadpid(nextpid)) {
+						next_is_writer = rwbflags[nextpid];
+					} else {
+						next_is_writer = 0;
+					}
+				}
 			}
 		}
 	}
@@ -303,9 +317,9 @@ syscall print_rwb_debug() {
 				if(! isempty(rwb->rwqueue) ) {
 					LOG2(DEBUG_L3,DEBUG_RWB,"    Queue:      %d waiting [", rwb->rwcount);
 					qpid = firstid(rwb->rwqueue);
-					is_writer = rwbflags[qpid];
 
 					while(! isbadpid(qpid) ) {
+						is_writer = rwbflags[qpid];
 						LOG2(DEBUG_L3,DEBUG_RWB,"%d (", qpid);
 						if(is_writer == -1) {
 							LOG2(DEBUG_L3,DEBUG_RWB,"W");
@@ -316,7 +330,7 @@ syscall print_rwb_debug() {
 						}
 						LOG2(DEBUG_L3,DEBUG_RWB,"),");
 						qpid = queuetab[qpid].qnext;
-						is_writer = rwbflags[qpid];
+
 					}
 					LOG2(DEBUG_L3,DEBUG_RWB,"\b]\n");
 				}
