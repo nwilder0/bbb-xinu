@@ -18,6 +18,6 @@ struct rwbentry {
 extern struct rwbentry rwbtab[];
 extern int16 rwbflags[];
 
-#define	isbadrwb(s)	((int32)(s) < 0 || (s) >= RWB_COUNT)
+#define	isbadrwb(s)	((int32)(s) < 0 || (s) >= RWB_COUNT || rwbtab[s].rwstate == S_FREE)
 
 #endif /* INCLUDE_RWBLOCKER_H_ */

@@ -15,8 +15,11 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	/* If rescheduling is deferred, record attempt and return */
 
+	LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: starting\n");
+
 	if (Defer.ndefers > 0) {
 		Defer.attempt = TRUE;
+		LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: deferring\n");
 		return;
 	}
 
@@ -26,15 +29,20 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	if (ptold->prstate == PR_CURR) {  /* Process remains eligible */
 
+		LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: current remains eligible\n");
+
 		ptold->prprio = setprio(currpid); /* assign a new priority appropriate for the current scheduler */
+		LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: current process got new priority of %d\n",ptold->prprio);
 
 		if (ptold->prprio > firstkey(readylist)) {
+			LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: current remains current\n");
 			return;
 		}
 
 		/* Old process will no longer remain current */
 
 
+		LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: recording CPUQ data, then putting the old proc back in the ready list\n");
 		record_cpuqdata(currpid);  /* call function to record process state time data */
 								   /* (actual recording is controlled by EV_CPUQDATA env var and choice of scheduler) */
 		ptold->prstate = PR_READY;
@@ -44,18 +52,22 @@ void	resched(void)		/* Assumes interrupts are disabled	*/
 
 	/* Force context switch to highest priority ready process */
 	currpid = dequeue(readylist);
+	LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: new current proc is %d\n",currpid);
 
 	/* LOG("\nResched(): new curr ps is pid = %d\n",currpid); */
 	readycount--;
 	ptnew = &proctab[currpid];
 
+	LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: recording CPUQ data (if active) then we'll reset the quantum\n");
 	record_cpuqdata(currpid);  /* call function to record process state time data */
 							   /* (actual recording is controlled by EV_CPUQDATA env var and choice of scheduler) */
 	ptnew->prstate = PR_CURR;
 	preempt = QUANTUM;		/* Reset time slice for process	*/
+	LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: last step: ARM context switch\n");
 	ctxsw(&ptold->prstkptr, &ptnew->prstkptr);
 
 	/* Old process returns here when resumed */
+	LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResched: returning\n");
 
 	return;
 }

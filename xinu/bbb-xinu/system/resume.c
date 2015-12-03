@@ -23,6 +23,7 @@ pri16	resume(
 
 	prptr = &proctab[pid];
 	if (prptr->prstate != PR_SUSP) {
+		LOG2(DEBUG_INFO, DEBUG_SCHEDULER, "\nResume: Error: pid is not in a PR_SUSP state\n");
 		restore(mask);
 		return (pri16)SYSERR;
 	}

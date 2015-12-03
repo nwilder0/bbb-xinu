@@ -7,7 +7,6 @@
 #include <queue.h>
 #include <resched.h>
 #include <semaphore.h>
-#include <rwblocker.h>
 #include <memory.h>
 #include <bufpool.h>
 #include <clock.h>
@@ -42,6 +41,7 @@
 #include <am335x_eth.h>
 #include <armv7a.h>
 #include <scheduler.h>
+#include <rwblocker.h>
 #include <stdlib.h>
 
 

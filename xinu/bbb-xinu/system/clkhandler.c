@@ -67,6 +67,7 @@ void	clkhandler()
 	/* Reschedule if necessary	    */
 
 	if((--preempt) == 0) {
+		LOG2(DEBUG_INFO,DEBUG_SCHEDULER,"\nClkInt: preemption time \n");
 		preempt = QUANTUM;
 		resched();
 	}
