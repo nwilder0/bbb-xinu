@@ -113,6 +113,7 @@ void	nulluser()
     wddisable();
 
 	/* Create a process to execute function main() */
+    LOG2(DEBUG_INFO,DEBUG_SCHEDULER,"nulluser: about to create main, Defer.ndefers = %d",Defer.ndefers);
 
 	resume (
 	   create((void *)main, INITSTK, INITPRIO, "Main process", 0,

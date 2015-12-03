@@ -80,6 +80,7 @@ status	resched_cntl(		/* Assumes interrupts are disabled	*/
 	  int32	defer		/* Either DEFER_START or DEFER_STOP	*/
 	)
 {
+	LOG2(DEBUG_INFO,DEBUG_SCHEDULER,"resched_cntl: just starting, currpid = %d, defer param = %d",currpid, defer);
 	switch (defer) {
 
 	    case DEFER_START:	/* Handle a deferral request */
