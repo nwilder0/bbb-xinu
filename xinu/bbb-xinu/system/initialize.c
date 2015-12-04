@@ -21,7 +21,8 @@ struct	procent	proctab[NPROC];	/* Process table			*/
 struct	sentry	semtab[NSEM];	/* Semaphore table			*/
 struct  rwbentry rwbtab[RWB_COUNT]; /* Read-Write Blocker table */
 struct	memblk	memlist;	/* List of free memory blocks		*/
-int32 rwbflags[NPROC];
+int32 rwbflags[NPROC];		/* array to hold a value indicating whether a process is a */
+							/*	read-write blocker reader (1), writer (-1), or neither (0) */
 
 /* Active system status */
 
@@ -145,6 +146,7 @@ static	void	sysinit()
 
 	platinit();
 
+	/* initialize the debug mask value that controls LOG2 output */
 	debug_mask = DBGROUP_DEFAULT + DBLEVEL_DEFAULT;
 
 	LOG("initevec()\n");
@@ -227,6 +229,7 @@ static	void	sysinit()
 		semptr->squeue = newqueue();
 	}
 
+	/* initialize all the read-write blockers */
 	for(i=0; i<RWB_COUNT; i++) {
 		rwbptr = &rwbtab[i];
 		rwbptr->rwcount = 0;
@@ -235,6 +238,7 @@ static	void	sysinit()
 		rwbptr->qcount = 0;
 	}
 
+	/* initialize the read-write blocker flags for each (potential) process ID */
 	for(i=0; i<NPROC; i++) {
 		rwbflags[i] = 0;
 	}

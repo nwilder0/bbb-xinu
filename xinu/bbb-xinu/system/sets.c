@@ -107,6 +107,15 @@ syscall set_cmdhistory(struct envvar *varptr, uint32 newval) {
 	return OK;
 }
 
+/*------------------------------------------------------------------------
+ *  set_dblevel - sets the debug level env var and updates the global
+ *  debug_mask variable to use the new corresponding value as it's four
+ *  most significant bits; this value controls the severity level of
+ *  displayed debug messages ranging from most restrictive (none - 0) to
+ *  least restrictive (verbose - 0xF) (other values are error (1), warning
+ *  (3), and info (7)); values are inclusive to more restrictive settings
+ *------------------------------------------------------------------------
+ */
 syscall set_dblevel(struct envvar *varptr, uint32 newval) {
 
 	uint32 i;
@@ -114,12 +123,17 @@ syscall set_dblevel(struct envvar *varptr, uint32 newval) {
 
 	uint32 oldval = varptr->val;
 
+	/* if a change was actually made */
 	if(oldval != newval) {
+		/* since values are inclusive build the total based on the 2's
+		 * exponent provided from the setenv function */
 		for(i=1; i<=newval; i++)
 		{
+			/* since level is the most significant 4 bits, shift left */
 			lvlmask = lvlmask + DEBUG_L1 * (0x0001<<i);
 		}
 
+		/* mask off group bits, and combine them with the new level ones */
 		debug_mask = (debug_mask & ~(DEBUG_VERBOSE)) | lvlmask;
 
 		varptr->val = newval;
@@ -128,21 +142,34 @@ syscall set_dblevel(struct envvar *varptr, uint32 newval) {
 	return OK;
 }
 
+/*------------------------------------------------------------------------
+ *  set_dbgroup - sets the debug group env var and updates the global
+ *  debug_mask variable to use the new corresponding value as it's 12
+ *  least significant bits; this value controls the category of
+ *  displayed debug messages; values include none, scheduler, memalloc,
+ *  shell, rwb, and all
+ *------------------------------------------------------------------------
+ */
 syscall set_dbgroup(struct envvar *varptr, uint32 newval) {
 
 	uint16 grpmask = (uint16)newval;
 
 	uint32 oldval = varptr->val;
 
+	/* if a change was actually made */
 	if(oldval != newval) {
+		/* if < 2, then grpmask == newval */
 		if(newval>2) {
+			/* if newval is the highest value for this env var */
+			/* then it must correspond to DEBUG_ALL (0xFFF) */
 			if(newval>=(DBGROUP_STRNUM-1)) {
 				grpmask = DEBUG_ALL;
 			} else {
+				/* else correct grpmask is newval-1 left shifts */
 				grpmask = 1 << (newval-1);
 			}
 		}
-
+		/* mask off the level bits and combine with new grpmask */
 		debug_mask = (debug_mask & ~(DEBUG_ALL)) | grpmask;
 
 		varptr->val = newval;

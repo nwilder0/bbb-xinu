@@ -25,6 +25,7 @@ void	ttyhandle_in (
 	if(ch==TY_CTRLC) {
 		reshell();
 		return;
+	/* if ctrl-G is pressed, then set both environment variables to stop all debug message output */
 	} else if(ch==TY_BELL) {
 		setenv(EV_DEBUG, EV_VALUE_NO);
 		setenv(EV_DBGROUP, DEBUG_NONE);

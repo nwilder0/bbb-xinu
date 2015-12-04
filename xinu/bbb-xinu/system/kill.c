@@ -62,9 +62,13 @@ syscall	kill(
 		break;
 
 	case PR_WAIT:
+		/* rwb IDs are encoded in prsem field as negatives below -1 (-1 = null) */
 		if(prptr->prsem < -1) {
+			/* get the actual rwb ID */
 			rwbid = -1 * (prptr->prsem + 2);
+			/* reset the process' rwb flag */
 			rwbflags[pid] = 0;
+			/* decrement the queue count for the queue the process will be removed from */
 			rwbtab[rwbid].qcount--;
 		} else {
 			semtab[prptr->prsem].scount++;
@@ -73,6 +77,7 @@ syscall	kill(
 
 	case PR_READY:
 		getitem(pid);		/* Remove from queue */
+		/* if actively using rwb, then exit by calling signalrwb */
 		if(rwbflags[pid] != 0  && prptr->prsem < -1) _signalrwb(pid, -1*(prptr->prsem+2));
 		/* Fall through */
 
