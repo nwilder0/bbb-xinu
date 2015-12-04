@@ -234,6 +234,7 @@ static	void	sysinit()
 		rwbptr->rwstate = S_FREE;
 		rwbptr->qcount = 0;
 	}
+
 	for(i=0; i<NPROC; i++) {
 		rwbflags[i] = 0;
 	}

@@ -46,6 +46,7 @@ local	rwb32	newrwb(void)
 			return rwb;
 		}
 	}
+
 	return SYSERR;
 }
 
@@ -76,7 +77,7 @@ syscall	rwbdelete(
 	rwbptr->rwstate = S_FREE;
 
 	resched_cntl(DEFER_START);
-	while (rwbptr->qcount-- > 0) {	/* Free all waiting processes	*/
+	while (rwbptr->qcount-- > 0) {
 		pid = getfirst(rwbptr->rwqueue);
 		if (!isbadpid(pid)) {
 			rwbflags[pid] = 0;
@@ -88,6 +89,7 @@ syscall	rwbdelete(
 
 	resched_cntl(DEFER_STOP);
 	restore(mask);
+
 	return OK;
 }
 
@@ -113,7 +115,7 @@ syscall	rwbreset(
 	}
 
 	rwbptr = &rwbtab[rwb];
-	rwbqueue = rwbptr->rwqueue;	/* Free any waiting processes */
+	rwbqueue = rwbptr->rwqueue;
 	resched_cntl(DEFER_START);
 	while ((pid=getfirst(rwbqueue)) != EMPTY)
 		rwbptr->qcount--;
@@ -121,9 +123,10 @@ syscall	rwbreset(
 			rwbflags[pid] = 0;
 			ready(pid);
 		}
-	rwbptr->rwcount = count;		/* Reset count as specified */
+	rwbptr->rwcount = count;
 	resched_cntl(DEFER_STOP);
 	restore(mask);
+
 	return OK;
 }
 
@@ -150,7 +153,8 @@ syscall rwb_trywrite(rwb32 rwb)
 	}
 
 	rwbflags[currpid] = -1;
-	if ((rwbptr->rwcount) != 0) {		/* If caller must block	*/
+	if (((rwbptr->rwcount) != 0) || (rwbptr->qcount > 0)) {		/* If caller must block	*/
+
 		prptr = &proctab[currpid];
 
 		record_cpuqdata(currpid);  /* call function to record process state time data */
@@ -161,9 +165,9 @@ syscall rwb_trywrite(rwb32 rwb)
 		rwbptr->qcount++;
 		enqueue(currpid,rwbptr->rwqueue);/* Enqueue on semaphore	*/
 		resched();			/*   and reschedule	*/
-	} else {
-		rwbptr->rwcount--;
+
 	}
+	rwbptr->rwcount--;
 
 	restore(mask);
 	return OK;
@@ -191,7 +195,7 @@ syscall rwb_tryread(rwb32 rwb)
 	}
 
 	rwbflags[currpid] = 1;
-	if ((rwbptr->rwcount) < 0) {		/* If caller must block	*/
+	if ((rwbptr->rwcount < 0) || (rwbptr->qcount > 0)) {		/* If caller must block	*/
 		prptr = &proctab[currpid];
 
 		record_cpuqdata(currpid);  /* call function to record process state time data */
@@ -202,11 +206,12 @@ syscall rwb_tryread(rwb32 rwb)
 		rwbptr->qcount++;
 		enqueue(currpid,rwbptr->rwqueue);/* Enqueue on semaphore	*/
 		resched();			/*   and reschedule	*/
-	} else {
-		rwbptr->rwcount++;
+
 	}
+	rwbptr->rwcount++;
 
 	restore(mask);
+
 	return OK;
 }
 
@@ -219,7 +224,8 @@ syscall _signalrwb(pid32 thisid, rwb32 rwb) {
 
 	intmask mask;			/* Saved interrupt mask		*/
 	struct	rwbentry *rwbptr;		/* Ptr to sempahore table entry	*/
-	signed char is_writer, next_is_writer;
+
+	int32 is_writer, next_is_writer;
 	pid32 nextpid = -1;
 
 	mask = disable();
@@ -243,28 +249,32 @@ syscall _signalrwb(pid32 thisid, rwb32 rwb) {
 	}
 
 
-	if (is_writer) {
+	if (is_writer==-1) {
 		rwbptr->rwcount++;
 	} else {
 		rwbptr->rwcount--;
 	}
 
 	if(isempty(rwbptr->rwqueue)) {
+		LOG2(DEBUG_INFO,DEBUG_RWB,"rwsignal: PID %d wants to signal on %d but found it empty",thisid,rwb);
 		next_is_writer = 0;
 	} else {
-		nextpid = firstkey(rwbptr->rwqueue);
+		nextpid = firstid(rwbptr->rwqueue);
 		if (!isbadpid(nextpid)) {
 			next_is_writer = rwbflags[nextpid];
 			if(next_is_writer == -1) {
-				if(rwbptr->rwqueue == 0) {
+				if(rwbptr->rwcount == 0) {
 					rwbptr->qcount--;
 					ready(dequeue(rwbptr->rwqueue));
 				}
 			} else {
+				if(next_is_writer != 1) {
+					LOG2(DEBUG_INFO,DEBUG_RWB,"rwsignal: PID %d wants to dequeue PID %d but rwbflag is not 1 (%d)",thisid,nextpid,next_is_writer);
+				}
 				while(next_is_writer == 1) {
 					rwbptr->qcount--;
 					ready(dequeue(rwbptr->rwqueue));
-					nextpid = firstkey(rwbptr->rwqueue);
+					nextpid = firstid(rwbptr->rwqueue);
 					if (!isbadpid(nextpid)) {
 						next_is_writer = rwbflags[nextpid];
 					} else {
@@ -272,22 +282,29 @@ syscall _signalrwb(pid32 thisid, rwb32 rwb) {
 					}
 				}
 			}
+		} else {
+			LOG2(DEBUG_INFO,DEBUG_RWB,"rwsignal: PID %d wants to signal on %d queue, but first PID %d is bad",thisid,rwbptr->rwqueue,nextpid);
 		}
 	}
 
 	proctab[thisid].prsem = -1;
 
+	resched();
 	restore(mask);
+
 	return OK;
 
 }
 
 syscall print_rwb_debug() {
 
+	intmask mask;
 	int i = 0;
 	struct rwbentry *rwb;
 	qid16 qpid;
 	signed char is_writer;
+
+	mask = disable();
 
 	LOG2(DEBUG_L3,DEBUG_RWB,"\nPrinting Read-Write Blocker Debug data:\n");
 
@@ -299,24 +316,25 @@ syscall print_rwb_debug() {
 
 		rwb = &rwbtab[i];
 
-		LOG2(DEBUG_L3,DEBUG_RWB,"\n%d. Entry state = ");
+		LOG2(DEBUG_L3,DEBUG_RWB,"\n%d. Entry state = ",i);
 		if(rwb->rwstate == S_FREE) {
 			LOG2(DEBUG_L3,DEBUG_RWB,"Free");
 		} else {
 			LOG2(DEBUG_L3,DEBUG_RWB,"In Use\n    ");
 			LOG2(DEBUG_L3,DEBUG_RWB,"Current Activity: ");
 			if(rwb->rwcount == 0) {
-				LOG2(DEBUG_L3,DEBUG_RWB,"      None");
+				LOG2(DEBUG_L3,DEBUG_RWB,"      None (%d)", rwb->rwcount);
 			} else {
 				if(rwb->rwcount > 0) {
 					LOG2(DEBUG_L3,DEBUG_RWB,"      Reading (%d readers)",rwb->rwcount);
 
 				} else {
-					LOG2(DEBUG_L3,DEBUG_RWB,"      Writing");
+					LOG2(DEBUG_L3,DEBUG_RWB,"      Writing (%d)",rwb->rwcount);
 				}
-				if(! isempty(rwb->rwqueue) ) {
-					LOG2(DEBUG_L3,DEBUG_RWB,"    Queue:      %d waiting [", rwb->rwcount);
-					qpid = firstid(rwb->rwqueue);
+			}
+			if(! isempty(rwb->rwqueue) ) {
+				LOG2(DEBUG_L3,DEBUG_RWB,"    Queue:      %d waiting [", rwb->qcount);
+				qpid = firstid(rwb->rwqueue);
 
 					while(! isbadpid(qpid) ) {
 						is_writer = rwbflags[qpid];
@@ -332,15 +350,15 @@ syscall print_rwb_debug() {
 						qpid = queuetab[qpid].qnext;
 
 					}
-					LOG2(DEBUG_L3,DEBUG_RWB,"\b]\n");
-				}
-
+					LOG2(DEBUG_L3,DEBUG_RWB,"]\n");
 			}
+
 		}
 
 
 	}
 	LOG2(DEBUG_L3,DEBUG_RWB,"\n\n\n");
+	restore(mask);
 
 	return 0;
 }

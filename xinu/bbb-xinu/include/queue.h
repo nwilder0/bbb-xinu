@@ -2,11 +2,15 @@
 
 /* Queue structure declarations, constants, and inline functions	*/
 
+#ifndef RWB_COUNT
+#define RWB_COUNT 10
+#endif
+
 /* Default # of queue entries: 1 per process plus 2 for ready list plus	*/
 /*			2 for sleep list plus 2 per semaphore		*/
 /* Added: 4 more for scratch/misc use and RWB_COUNT for number of reader-writer blocking elements */
 #ifndef NQENT
-#define NQENT	(NPROC + 4 + NSEM + NSEM + 4 + RWB_COUNT)
+#define NQENT	(NPROC + 4 + NSEM + NSEM + 4 + RWB_COUNT + RWB_COUNT)
 #endif
 
 #define	EMPTY	(-1)		/* Null value for qnext or qprev index	*/

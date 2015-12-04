@@ -89,5 +89,5 @@ extern 	shellcmd  xsh_factwait(int32, char *[]);
 extern 	shellcmd  xsh_set(int32, char *[]);
 
 /* in file xsh_rwb_test.c */
-extern  shellcmd xsh_rwb_test(int32, char *[]);
-extern  shellcmd xsh_add_rwb_tester(int32, char *[]);
+extern  shellcmd xsh_rwb_test_init(int32, char *[]);
+extern  shellcmd xsh_rwb_add_tester(int32, char *[]);

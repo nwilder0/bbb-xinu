@@ -22,7 +22,7 @@ void	clkhandler()
 		return;
 	}
 
-	LOG2(DEBUG_INFO,DEBUG_SCHEDULER,
+	LOG2(DEBUG_VERBOSE,DEBUG_SCHEDULER,
 			"\nClkInt: a clock tick is being handled, ms was %d, secs were %d\n", 1000-count1000,clktime);
 
 	/* Acknowledge the interrupt */
@@ -67,7 +67,7 @@ void	clkhandler()
 	/* Reschedule if necessary	    */
 
 	if((--preempt) == 0) {
-		LOG2(DEBUG_INFO,DEBUG_SCHEDULER,"\nClkInt: preemption time \n");
+		LOG2(DEBUG_VERBOSE,DEBUG_SCHEDULER,"\nClkInt: preemption time \n");
 		preempt = QUANTUM;
 		resched();
 	}

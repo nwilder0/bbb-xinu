@@ -14,7 +14,7 @@ int32 shared_data2[10];
 
 rwb32 rwbtestid[2];
 
-shellcmd xsh_rwb_test(int nargs, char *args[])
+shellcmd xsh_rwb_test_init(int nargs, char *args[])
 {
 	int i;
 
@@ -31,16 +31,16 @@ shellcmd xsh_rwb_test(int nargs, char *args[])
 
 
 	printf("\nread-write blocker 1 created with ID: %d",rwbtestid[0]);
-	printf("\nread-write blocker 2 created with ID: %d", rwbtestid[1]);
+	printf("\nread-write blocker 2 created with ID: %d\n", rwbtestid[1]);
 
 	print_rwb_debug();
 
 	return OK;
 }
 
-shellcmd xsh_add_rwb_tester(int nargs, char *args[]) {
+shellcmd xsh_rwb_add_tester(int nargs, char *args[]) {
 
-	unsigned char is_writer = 1;
+	signed char is_writer = 1;
 	int32 r,j;
 	int32 wtime;
 	int32 ridx;
@@ -50,7 +50,7 @@ shellcmd xsh_add_rwb_tester(int nargs, char *args[]) {
 	// rwb_test [processes per blocker] [how many are writers]
 
 	if(nargs>1) {
-		if(!strncmp(args[1],"w",1)) {
+		if(!strncmp(args[1],"w",2)) {
 			is_writer = -1;
 		}
 	}
@@ -63,32 +63,32 @@ shellcmd xsh_add_rwb_tester(int nargs, char *args[]) {
 		wtime = (rand()%6+2)*1000;
 
 		if(is_writer == -1) {
-			printf("\nPID: %d - writer about to try to enter the work loop\n",currpid);
+			LOG2(DEBUG_INFO,DEBUG_RWB,"\nPID: %d - writer about to try to enter the work loop\n",currpid);
 			rwb_trywrite(rwbtestid[r]);
-			printf("\nPID: %d - starting work loop\n",currpid);
+			LOG2(DEBUG_INFO,DEBUG_RWB,"\nPID: %d - starting work loop\n",currpid);
 			for(j=0; j<5; j++) {
 				//chose a random index of the shared_data to work on
 				ridx = rand() % 10;
 				if(r) shared_data2[ridx] = shared_data2[ridx] + wtime/1000;
 				else shared_data1[ridx] = shared_data1[ridx] + wtime/1000;
 
-				printf("\nPID: %d - Wrote to shared_data %d: index %d; added value of %d\n",currpid,r,ridx,(wtime/1000));
+				LOG2(DEBUG_INFO,DEBUG_RWB,"\nPID: %d - Wrote to shared_data %d: index %d; added value of %d\n",currpid,r,ridx,(wtime/1000));
 				sleepms(wtime/5);
 			}
 		} else {
-			printf("\nPID: %d - reader about to try to enter the work loop\n",currpid);
+			LOG2(DEBUG_INFO,DEBUG_RWB,"\nPID: %d - reader about to try to enter the work loop\n",currpid);
 			rwb_tryread(rwbtestid[r]);
-			printf("\nPID: %d - starting work loop\n",currpid);
+			LOG2(DEBUG_INFO,DEBUG_RWB,"\nPID: %d - starting work loop\n",currpid);
 			for(j=0; j<5; j++) {
 				// chose random index
 				ridx = rand() % 10;
 				if(r) read_num = shared_data2[ridx];
 				else read_num = shared_data1[ridx];
-				printf("\nPID: %d - Read value of %d from shared_data %d at index %d \n",currpid,read_num,r,ridx);
+				LOG2(DEBUG_INFO,DEBUG_RWB,"\nPID: %d - Read value of %d from shared_data %d at index %d \n",currpid,read_num,r,ridx);
 				sleepms(wtime/5);
 			}
 		}
-		printf("\nPID: %d - work loop finished, signaling\n",currpid);
+		LOG2(DEBUG_INFO,DEBUG_RWB,"\nPID: %d - work loop finished, signaling\n",currpid);
 		signalrwb(rwbtestid[r]);
 
 	}

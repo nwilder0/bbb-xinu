@@ -25,6 +25,11 @@ void	ttyhandle_in (
 	if(ch==TY_CTRLC) {
 		reshell();
 		return;
+	} else if(ch==TY_BELL) {
+		setenv(EV_DEBUG, EV_VALUE_NO);
+		setenv(EV_DBGROUP, DEBUG_NONE);
+		kprintf("\nTurning off all Debug messages\n");
+		return;
 	}
 
 	/* Compute chars available */
